@@ -2,6 +2,10 @@
    LABVANCED STUDIO – APPLICATION ENGINE (HTML, CSS, JS THUẦN)
    ========================================================================== */
 
+// Google Sheets Webhook URL (cố định)
+const GSHEET_URL = "https://script.google.com/macros/s/AKfycbxtoOTPnc5ZgoPPolljtKBX2D4NatR66vZbAYx0BsVj2c3G9yCed9KpuXoRops4Hu5--A/exec";
+
+
 // ===== 1. CORE APPLICATION STATE =====
 let state = {
   projectName: "Thí nghiệm Stroop Màu sắc - Từ ngữ",
@@ -14,7 +18,7 @@ let state = {
   settings: {
     randomizeTrials: false,
     autoSyncGSheet: true,
-    gsheetUrl: ""
+    gsheetUrl: GSHEET_URL
   },
   results: [] // Participant run records
 };
@@ -2982,7 +2986,7 @@ function finishExperimentPlayback() {
   
   // GSheet Sync Trigger
   const syncStatusPlayer = document.getElementById("player-sync-status");
-  if (state.settings.autoSyncGSheet && state.settings.gsheetUrl) {
+  if (state.settings.autoSyncGSheet && GSHEET_URL) {
     syncStatusPlayer.style.display = "block";
     syncStatusPlayer.textContent = "🚀 Đang tự động gửi dữ liệu lên Google Sheets...";
     syncDataToGSheet(newRun)
@@ -3320,7 +3324,7 @@ function escapeCSV(val) {
 
 // ===== 14. GOOGLE SHEETS WEBHOOK SYNC INTEGRATION =====
 function syncDataToGSheet(runData) {
-  if (!state.settings.gsheetUrl) {
+  if (!GSHEET_URL) {
     return Promise.resolve(false);
   }
   
@@ -3343,7 +3347,7 @@ function syncDataToGSheet(runData) {
   };
   
   // Send POST request (use no-cors mode to handle Google Apps Script redirect cleanly)
-  return fetch(state.settings.gsheetUrl, {
+  return fetch(GSHEET_URL, {
     method: "POST",
     mode: "no-cors",
     headers: {
@@ -3363,8 +3367,8 @@ function syncDataToGSheet(runData) {
 }
 
 function testGSheetConnection() {
-  if (!state.settings.gsheetUrl) {
-    showNotification("Vui lòng điền Webhook URL trước!", "danger");
+  if (!GSHEET_URL) {
+    showNotification("URL Google Sheets chưa được cấu hình!", "danger");
     return;
   }
   
@@ -3381,7 +3385,7 @@ function testGSheetConnection() {
     trials: [{ trialNum: 1, rt: 250, response: "test", correct: true, variablesLoaded: { test: "success" } }]
   };
   
-  fetch(state.settings.gsheetUrl, {
+  fetch(GSHEET_URL, {
     method: "POST",
     mode: "no-cors",
     headers: {
@@ -3406,9 +3410,8 @@ function syncResultsToGSheetManual() {
     return;
   }
   
-  if (!state.settings.gsheetUrl) {
-    showNotification("Vui lòng điền và cấu hình URL Google Sheets Webhook ở tab cài đặt!", "danger");
-    switchTab("gsheet");
+  if (!GSHEET_URL) {
+    showNotification("URL Google Sheets chưa được cấu hình!", "danger");
     return;
   }
   

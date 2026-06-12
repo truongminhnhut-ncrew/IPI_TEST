@@ -1802,3 +1802,337 @@ body::before {
   box-shadow: 0 0 10px var(--primary-glow);
   transform: translateY(-1px);
 }
+
+/* ==========================================================================
+   RESPONSIVE – TABLET & MOBILE
+   ========================================================================== */
+
+/* ── Tablet (≤ 1024px) ── */
+@media (max-width: 1024px) {
+  .app-header {
+    padding: 0 16px;
+    height: 60px;
+  }
+
+  .header-center {
+    display: none; /* ẩn project title ở giữa */
+  }
+
+  .editor-grid {
+    grid-template-columns: 220px 1fr 260px;
+  }
+
+  .project-title-input {
+    width: 200px;
+  }
+
+  .grid-2col {
+    grid-template-columns: 1fr;
+  }
+
+  .trials-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Small Tablet / Large Phone (≤ 768px) ── */
+@media (max-width: 768px) {
+  html, body {
+    overflow: auto;
+  }
+
+  .app-wrapper {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .app-header {
+    padding: 0 12px;
+    height: 56px;
+    flex-wrap: wrap;
+  }
+
+  .logo-title {
+    font-size: 15px;
+  }
+
+  .logo-sub {
+    display: none;
+  }
+
+  .header-center {
+    display: none;
+  }
+
+  .header-right {
+    gap: 6px;
+  }
+
+  .header-right .btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  /* Tabs: scroll horizontally */
+  .app-tabs {
+    padding: 0 8px;
+    gap: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .app-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    padding: 6px 12px 10px;
+    font-size: 12px;
+    gap: 5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tab-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Editor: stack sidebar + canvas vertically */
+  .editor-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    height: auto;
+    overflow: visible;
+  }
+
+  .editor-sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .editor-properties-panel {
+    border-left: none;
+    border-top: 1px solid var(--border-color);
+    max-height: 280px;
+    overflow-y: auto;
+  }
+
+  .canvas-area {
+    min-height: 320px;
+  }
+
+  .canvas-viewport {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 4/3;
+  }
+
+  /* Tab panels scroll */
+  .tab-content-container {
+    overflow: visible;
+  }
+
+  .tab-panel {
+    height: auto;
+    overflow-y: visible;
+  }
+
+  .tab-panel.active {
+    display: block;
+  }
+
+  .grid-2col,
+  .trials-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .panel-content-scroll {
+    padding: 12px;
+  }
+
+  /* Cards */
+  .card {
+    border-radius: var(--radius-md);
+  }
+
+  .card-header {
+    padding: 12px 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .card-body {
+    padding: 12px 14px;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .button-group-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* KPI row */
+  .kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  /* Results table */
+  .results-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    min-width: 600px;
+  }
+
+  /* Player overlay */
+  .player-overlay {
+    padding: 12px;
+  }
+
+  .player-setup-box {
+    padding: 20px 16px;
+    border-radius: var(--radius-md);
+    max-width: 100%;
+  }
+
+  .player-setup-box h2 {
+    font-size: 20px;
+  }
+
+  #player-canvas {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 260px;
+    aspect-ratio: 4/3;
+    border-radius: var(--radius-md);
+  }
+
+  .player-hud {
+    padding: 6px 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .player-complete-box {
+    padding: 20px 16px;
+    border-radius: var(--radius-md);
+    max-width: 100%;
+  }
+
+  /* Trials matrix table */
+  .trials-matrix-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #trials-matrix-table {
+    min-width: 700px;
+  }
+
+  /* Runs history */
+  .run-history-item {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+/* ── Mobile (≤ 480px) ── */
+@media (max-width: 480px) {
+  .app-header {
+    height: 52px;
+    padding: 0 10px;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .logo-title {
+    font-size: 14px;
+  }
+
+  .tab-btn {
+    padding: 5px 10px 8px;
+    font-size: 11px;
+  }
+
+  .kpi-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .kpi-card {
+    padding: 12px 10px;
+  }
+
+  .kpi-value {
+    font-size: 22px;
+  }
+
+  .header-right .btn-secondary span,
+  .header-right .btn-run span {
+    display: none; /* chỉ hiện icon trên màn hình rất nhỏ */
+  }
+
+  #player-canvas {
+    min-height: 220px;
+  }
+
+  .player-setup-box h2 {
+    font-size: 18px;
+  }
+
+  .player-setup-actions {
+    flex-direction: column;
+  }
+
+  .toast-notification {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+}
+
+/* Touch device improvements */
+@media (hover: none) and (pointer: coarse) {
+  .btn:hover {
+    transform: none;
+  }
+
+  .tab-btn:hover {
+    background: transparent;
+  }
+
+  .slide-thumb:hover {
+    transform: none;
+  }
+
+  input, select, textarea {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+  }
+}
+
+/* Viewport meta addons — ensure content fits */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .app-wrapper {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+

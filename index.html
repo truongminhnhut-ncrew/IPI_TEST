@@ -71,10 +71,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM21 9H3M21 15H3M12 3v18"/></svg>
           Bảng Kích Thích (Stimuli & Trials)
         </button>
-        <button class="tab-btn" id="tab-gsheet" onclick="switchTab('gsheet')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 3v18M16 3v18M2 10h20M2 16h20"/></svg>
-          Kết Nối Google Sheets
-        </button>
+
         <button class="tab-btn" id="tab-results" onclick="switchTab('results')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           Dữ Liệu & Phân Tích
@@ -444,112 +441,7 @@
           </div>
         </section>
 
-        <!-- 3. GOOGLE SHEETS INTEGRATION PANEL -->
-        <section id="panel-gsheet" class="tab-panel">
-          <div class="grid-2col">
-            
-            <div class="card">
-              <div class="card-header">
-                <h3>Cấu Hình Đồng Bộ Google Sheets</h3>
-              </div>
-              <div class="card-body">
-                <p class="description">
-                  Bạn có thể gửi toàn bộ kết quả đo lường (thời gian phản ứng, câu trả lời đúng/sai, chi tiết từng trial) trực tiếp lên một bảng tính Google Sheets của bạn thông qua Google Apps Script Web App.
-                </p>
 
-                <div class="form-group" style="margin-top: 20px;">
-                  <label for="gsheet-url" class="field-label">Google Apps Script Web App URL (Webhook)</label>
-                  <input type="text" id="gsheet-url" placeholder="https://script.google.com/macros/s/.../exec" oninput="updateGSheetUrl(this.value)" class="full-width-input" />
-                  <small class="help-text">Dán đường dẫn Deployment URL sau khi xuất bản Google Apps Script của bạn ở đây.</small>
-                </div>
-
-                <div class="sync-status-box" id="sync-status-box">
-                  <div class="status-indicator disconnected" id="status-indicator"></div>
-                  <span class="status-text" id="status-text">Chưa kết nối Webhook</span>
-                </div>
-
-                <div class="button-group-row">
-                  <button class="btn btn-primary" onclick="testGSheetConnection()">
-                    Kiểm Tra Kết Nối
-                  </button>
-                  <label class="checkbox-container inline-checkbox">
-                    <input type="checkbox" id="setting-auto-sync" onchange="updateExperimentSetting('autoSyncGSheet', this.checked)">
-                    Tự động đồng bộ ngay sau khi kết thúc lượt thử nghiệm
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-header">
-                <h3>Hướng Dẫn 3 Bước Cực Kỳ Đơn Giản</h3>
-              </div>
-              <div class="card-body">
-                <ol class="step-list">
-                  <li>
-                    <strong>Tạo Google Sheet mới</strong>: 
-                    Vào <a href="https://sheets.new" target="_blank" class="accent-link">sheets.new</a> để tạo một Google Sheet trống.
-                  </li>
-                  <li>
-                    <strong>Thiết lập Apps Script</strong>:
-                    Nhấp vào <strong>Extensions (Tiện ích mở rộng)</strong> &gt; <strong>Apps Script</strong>. Xóa hết code cũ đi và dán đoạn mã bên dưới vào:
-                    <div class="code-container">
-                      <pre><code id="apps-script-code">
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
-  
-  // Viết tiêu đề cột nếu sheet còn trống
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow([
-      "Thời Gian", 
-      "Đối Tượng (Name)", 
-      "Thí Nghiệm", 
-      "Tổng Số Trial", 
-      "Số Câu Đúng", 
-      "Tỷ Lệ Đúng (%)", 
-      "Reaction Time Trung Bình (ms)", 
-      "Dữ Liệu Chi Tiết (JSON)"
-    ]);
-  }
-  
-  // Ghi kết quả nhận được từ IPI TEST Studio
-  sheet.appendRow([
-    new Date(),
-    data.participant || "Ẩn danh",
-    data.projectName || "Không tên",
-    data.totalTrials || 0,
-    data.correctCount || 0,
-    data.accuracy || 0,
-    data.meanRT || 0,
-    JSON.stringify(data.trials)
-  ]);
-  
-  return ContentService.createTextOutput(
-    JSON.stringify({ "status": "success" })
-  ).setMimeType(ContentService.MimeType.JSON);
-}
-
-function doGet(e) {
-  return ContentService.createTextOutput("IPI TEST Connection Test Active!");
-}
-                      </code></pre>
-                      <button class="btn btn-mini btn-copy" onclick="copyAppsScriptCode()">Sao chép code</button>
-                    </div>
-                  </li>
-                  <li>
-                    <strong>Triển khai Web App</strong>:
-                    Nhấp vào nút <strong>Deploy</strong> (Triển khai) &gt; <strong>New deployment</strong> (Triển khai mới). Chọn loại là <strong>Web app</strong>. 
-                    Mục <em>Execute as</em> chọn <strong>Me</strong>. Mục <em>Who has access</em> chọn <strong>Anyone</strong> (Bắt buộc để gửi dữ liệu không cần đăng nhập). Nhấp Deploy, cấp quyền và sao chép URL dán vào ô bên trái!
-                  </li>
-                </ol>
-              </div>
-            </div>
-
-          </div>
-        </section>
-
-        <!-- 4. RESULTS & DATA DASHBOARD -->
         <section id="panel-results" class="tab-panel">
           
           <!-- Analytics KPI Row -->
