@@ -1,49 +1,8 @@
-require('dotenv').config();
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const dns = require('dns');
-const { MongoClient } = require('mongodb');
-
-// Set custom DNS resolvers to bypass faulty ISP DNS servers for MongoDB Atlas SRV resolution
-try {
-  dns.setServers(['1.1.1.1', '8.8.8.8', '8.8.4.4']);
-} catch (e) {
-  console.warn('Cấu hình DNS server thất bại, sử dụng DNS mặc định:', e.message);
-}
 
 const PORT = process.env.PORT || 8080;
-const MONGODB_URI = process.env.MONGODB_URI;
-
-const DATA_DIR = path.join(__dirname, 'data');
-const PROJECT_FILE = path.join(DATA_DIR, 'project.json');
-const RESULTS_FILE = path.join(DATA_DIR, 'results.json');
-
-// Ensure local data directory exists (always keep as local fallback)
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR);
-}
-
-let db = null;
-let client = null;
-let isMongoConnected = false;
-
-// Attempt MongoDB Connection if MONGODB_URI is provided
-if (MONGODB_URI) {
-  console.log('Detect MONGODB_URI. Attempting to connect to MongoDB...');
-  client = new MongoClient(MONGODB_URI);
-  client.connect()
-    .then(() => {
-      db = client.db('ipi_test');
-      isMongoConnected = true;
-      console.log('🚀 Connected to MongoDB successfully! Database: ipi_test');
-    })
-    .catch(err => {
-      console.error('❌ Failed to connect to MongoDB, falling back to local file storage.', err.message);
-    });
-} else {
-  console.log('ℹ️ No MONGODB_URI provided in environment. Using local JSON file storage.');
-}
 
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
@@ -57,185 +16,27 @@ const mimeTypes = {
   '.ico': 'image/x-icon'
 };
 
-const server = http.createServer(async (req, res) => {
+const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
-  const pathname = url.pathname;
-  const method = req.method;
+  let filePath = url.pathname === '/' ? 'index.html' : url.pathname.substring(1);
 
-  // CORS Headers to allow requests from other machines
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  // Sanitize path to prevent directory traversal
+  filePath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
+  const fullPath = path.join(__dirname, filePath);
 
-  if (method === 'OPTIONS') {
-    res.writeHead(204);
-    res.end();
-    return;
+  if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+    const ext = path.extname(fullPath).toLowerCase();
+    const contentType = mimeTypes[ext] || 'application/octet-stream';
+    res.writeHead(200, { 'Content-Type': contentType });
+    fs.createReadStream(fullPath).pipe(res);
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('404 Not Found');
   }
-
-  // API: Get/Set Project Configuration
-  if (pathname === '/api/project') {
-    if (method === 'GET') {
-      if (isMongoConnected) {
-        try {
-          const project = await db.collection('projects').findOne({ key: 'current' });
-          if (project) {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(project.state));
-          } else {
-            // If DB is empty, try loading local file config to bootstrap
-            if (fs.existsSync(PROJECT_FILE)) {
-              const fileData = fs.readFileSync(PROJECT_FILE, 'utf8');
-              res.writeHead(200, { 'Content-Type': 'application/json' });
-              res.end(fileData);
-            } else {
-              res.writeHead(404, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'Project not found' }));
-            }
-          }
-        } catch (err) {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'DB read error', details: err.message }));
-        }
-      } else {
-        // Fallback to file storage
-        if (fs.existsSync(PROJECT_FILE)) {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          fs.createReadStream(PROJECT_FILE).pipe(res);
-        } else {
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Project not found' }));
-        }
-      }
-      return;
-    }
-    
-    if (method === 'POST') {
-      let body = '';
-      req.on('data', chunk => { body += chunk; });
-      req.on('end', async () => {
-        try {
-          const parsed = JSON.parse(body);
-          if (isMongoConnected) {
-            await db.collection('projects').updateOne(
-              { key: 'current' },
-              { $set: { state: parsed } },
-              { upsert: true }
-            );
-          } else {
-            fs.writeFileSync(PROJECT_FILE, body, 'utf8');
-          }
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ status: 'success', storage: isMongoConnected ? 'mongodb' : 'local' }));
-        } catch (e) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Invalid JSON', details: e.message }));
-        }
-      });
-      return;
-    }
-  }
-
-  // API: Get/Post Results
-  if (pathname === '/api/results') {
-    if (method === 'GET') {
-      if (isMongoConnected) {
-        try {
-          // Fetch results from MongoDB sorted by id descending
-          const results = await db.collection('results').find({}).sort({ id: -1 }).toArray();
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(results));
-        } catch (err) {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'DB read error', details: err.message }));
-        }
-      } else {
-        // Fallback to file storage
-        if (fs.existsSync(RESULTS_FILE)) {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          fs.createReadStream(RESULTS_FILE).pipe(res);
-        } else {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify([]));
-        }
-      }
-      return;
-    }
-
-    if (method === 'POST') {
-      let body = '';
-      req.on('data', chunk => { body += chunk; });
-      req.on('end', async () => {
-        try {
-          const newResult = JSON.parse(body);
-          if (isMongoConnected) {
-            await db.collection('results').insertOne(newResult);
-          } else {
-            let results = [];
-            if (fs.existsSync(RESULTS_FILE)) {
-              try {
-                results = JSON.parse(fs.readFileSync(RESULTS_FILE, 'utf8'));
-              } catch (e) {
-                results = [];
-              }
-            }
-            if (!Array.isArray(results)) results = [];
-            results.unshift(newResult);
-            fs.writeFileSync(RESULTS_FILE, JSON.stringify(results, null, 2), 'utf8');
-          }
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ status: 'success', storage: isMongoConnected ? 'mongodb' : 'local' }));
-        } catch (e) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Invalid JSON', details: e.message }));
-        }
-      });
-      return;
-    }
-  }
-
-  // API: Clear Results
-  if (pathname === '/api/clear-results' && method === 'POST') {
-    try {
-      if (isMongoConnected) {
-        await db.collection('results').deleteMany({});
-      } else {
-        fs.writeFileSync(RESULTS_FILE, JSON.stringify([]), 'utf8');
-      }
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'success', storage: isMongoConnected ? 'mongodb' : 'local' }));
-    } catch (e) {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Could not clear results', details: e.message }));
-    }
-    return;
-  }
-
-  // Static File Serving
-  if (method === 'GET') {
-    let filePath = pathname === '/' ? 'index.html' : pathname.substring(1);
-    // Sanitize path to prevent directory traversal
-    filePath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
-    const fullPath = path.join(__dirname, filePath);
-
-    if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
-      const ext = path.extname(fullPath).toLowerCase();
-      const contentType = mimeTypes[ext] || 'application/octet-stream';
-      res.writeHead(200, { 'Content-Type': contentType });
-      fs.createReadStream(fullPath).pipe(res);
-    } else {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('404 Not Found');
-    }
-    return;
-  }
-
-  res.writeHead(405, { 'Content-Type': 'text/plain' });
-  res.end('Method Not Allowed');
 });
 
-// Listen on all network interfaces to allow local network connections
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`IPI TEST Server is running on http://localhost:${PORT}`);
-  console.log(`To access from other machines in the same network, use http://<YOUR_IP_ADDRESS>:${PORT}`);
+  console.log(`IPI TEST Server is running at http://localhost:${PORT}`);
+  console.log(`Share with other devices: http://<YOUR_IP_ADDRESS>:${PORT}`);
+  console.log(`Participant link: http://<YOUR_IP_ADDRESS>:${PORT}/?role=participant`);
 });

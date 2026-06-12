@@ -1,26 +1,16 @@
 {
-  "name": "vibrant-goodall",
+  "name": "ipi-test",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "description": "IPI TEST - Psychology & Cognitive Experiment Builder",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/truongminhnhut-ncrew/IPI_TEST.git"
   },
-  "keywords": [],
+  "keywords": ["psychology", "experiment", "cognitive"],
   "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/truongminhnhut-ncrew/IPI_TEST/issues"
-  },
-  "homepage": "https://github.com/truongminhnhut-ncrew/IPI_TEST#readme",
-  "dependencies": {
-    "dotenv": "^17.4.2",
-    "mongodb": "^7.3.0"
-  }
+  "license": "ISC"
 }
