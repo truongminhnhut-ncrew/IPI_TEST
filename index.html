@@ -603,7 +603,10 @@ function doGet(e) {
             <div class="card history-container-card">
               <div class="card-header">
                 <h3>Lịch Sử Các Lượt Kiểm Tra</h3>
-                <button class="btn btn-mini btn-danger-outline" onclick="clearAllResultsData()">Xóa tất cả dữ liệu</button>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn btn-mini btn-secondary" onclick="loadResultsFromServer().then(ok => { if (ok) showNotification('Đã tải lại dữ liệu từ máy chủ!'); else showNotification('Lỗi khi tải dữ liệu từ máy chủ', 'danger'); })" title="Tải kết quả mới nhất từ máy chủ">🔄 Làm mới</button>
+                  <button class="btn btn-mini btn-danger-outline" onclick="clearAllResultsData()">Xóa tất cả dữ liệu</button>
+                </div>
               </div>
               <div class="runs-history-list" id="runs-history-list">
                 <!-- History list of runs rendered here -->

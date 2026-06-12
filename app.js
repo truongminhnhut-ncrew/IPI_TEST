@@ -73,47 +73,53 @@ document.addEventListener("DOMContentLoaded", () => {
                        urlParams.get("role") === "participant" || 
                        window.location.hash === "#participant";
   
-  // Initialize default project if empty
-  if (state.slides.length === 0) {
-    loadTemplate("type1_1");
-  } else {
-    initUI();
-  }
-  
-  if (isParticipantOnly) {
-    // Hide administrative editor layout completely
-    document.body.classList.add("participant-only-mode");
+  // Load configuration and results from server, then boot the app
+  Promise.all([
+    loadProjectFromServer(),
+    loadResultsFromServer()
+  ]).finally(() => {
+    // Initialize default project if empty
+    if (state.slides.length === 0) {
+      loadTemplate("type1_1");
+    } else {
+      initUI();
+    }
     
-    // Add styles to hide app-wrapper and adjust player actions
-    const style = document.createElement("style");
-    style.innerHTML = `
-      body.participant-only-mode .app-wrapper {
-        display: none !important;
-      }
-      body.participant-only-mode .player-overlay {
-        background-color: #0b0f19 !important;
-      }
-    `;
-    document.head.appendChild(style);
-    
-    // Open player immediately
-    setTimeout(() => {
-      startExperiment();
+    if (isParticipantOnly) {
+      // Hide administrative editor layout completely
+      document.body.classList.add("participant-only-mode");
       
-      // Hide the cancel button in participant mode
-      const cancelBtn = document.querySelector(".player-setup-actions .btn-secondary");
-      if (cancelBtn) {
-        cancelBtn.style.display = "none";
-      }
+      // Add styles to hide app-wrapper and adjust player actions
+      const style = document.createElement("style");
+      style.innerHTML = `
+        body.participant-only-mode .app-wrapper {
+          display: none !important;
+        }
+        body.participant-only-mode .player-overlay {
+          background-color: #0b0f19 !important;
+        }
+      `;
+      document.head.appendChild(style);
       
-      // Update the complete box button text and action
-      const submitBtn = document.querySelector("#player-complete-box .player-setup-actions .btn-primary");
-      if (submitBtn) {
-        submitBtn.textContent = "Hoàn thành & Bắt đầu lượt mới";
-        submitBtn.setAttribute("onclick", "location.reload()");
-      }
-    }, 150);
-  }
+      // Open player immediately
+      setTimeout(() => {
+        startExperiment();
+        
+        // Hide the cancel button in participant mode
+        const cancelBtn = document.querySelector(".player-setup-actions .btn-secondary");
+        if (cancelBtn) {
+          cancelBtn.style.display = "none";
+        }
+        
+        // Update the complete box button text and action
+        const submitBtn = document.querySelector("#player-complete-box .player-setup-actions .btn-primary");
+        if (submitBtn) {
+          submitBtn.textContent = "Hoàn thành & Bắt đầu lượt mới";
+          submitBtn.setAttribute("onclick", "location.reload()");
+        }
+      }, 150);
+    }
+  });
 });
 
 function openParticipantLink() {
@@ -158,12 +164,111 @@ function initUI() {
   switchTab(state.activeTab);
 }
 
+let serverSaveTimeout = null;
+
 function saveStateToLocalStorage() {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
+    saveStateToServer();
+  } catch (e) {
+    console.error("Lưu trữ LocalStorage thất bại:", e);
+  }
+}
+
+function saveStateToLocalStorageOnly() {
   try {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
   } catch (e) {
     console.error("Lưu trữ LocalStorage thất bại:", e);
   }
+}
+
+function saveStateToServer() {
+  if (serverSaveTimeout) clearTimeout(serverSaveTimeout);
+  serverSaveTimeout = setTimeout(() => {
+    // Clone state and strip results to keep project file clean
+    const projectConfig = {
+      projectName: state.projectName,
+      slides: state.slides,
+      variables: state.variables,
+      trialsTable: state.trialsTable,
+      settings: state.settings
+    };
+    
+    fetch('/api/project', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(projectConfig)
+    })
+    .then(r => r.json())
+    .then(data => {
+      console.log('Project config synced to server');
+    })
+    .catch(err => {
+      console.warn('Could not sync project config to server:', err);
+    });
+  }, 1000);
+}
+
+function loadProjectFromServer() {
+  return fetch('/api/project')
+    .then(r => {
+      if (!r.ok) throw new Error('No project config on server');
+      return r.json();
+    })
+    .then(projectConfig => {
+      if (projectConfig && Array.isArray(projectConfig.slides)) {
+        state.projectName = projectConfig.projectName || state.projectName;
+        state.slides = projectConfig.slides;
+        state.variables = projectConfig.variables || [];
+        state.trialsTable = projectConfig.trialsTable || [];
+        state.settings = projectConfig.settings || state.settings;
+        console.log('Project config loaded from server');
+      }
+    })
+    .catch(err => {
+      console.warn('Could not load project config from server, using local storage:', err);
+    });
+}
+
+function loadResultsFromServer() {
+  return fetch('/api/results')
+    .then(r => r.json())
+    .then(serverResults => {
+      if (Array.isArray(serverResults)) {
+        const resultsMap = new Map();
+        
+        // Load local ones first
+        state.results.forEach(r => {
+          if (r && r.id) resultsMap.set(r.id, r);
+        });
+        
+        // Override with server ones (server is source of truth)
+        serverResults.forEach(r => {
+          if (r && r.id) resultsMap.set(r.id, r);
+        });
+        
+        state.results = Array.from(resultsMap.values());
+        
+        // Sort by ID descending (which corresponds to timestamp since ID starts with run_TIMESTAMP)
+        state.results.sort((a, b) => {
+          const idA = a.id || "";
+          const idB = b.id || "";
+          return idB.localeCompare(idA);
+        });
+        
+        saveStateToLocalStorageOnly(); // save to local storage but don't loop back to server
+        if (typeof renderRunsHistory === 'function') renderRunsHistory();
+        if (typeof renderResultsTable === 'function') renderResultsTable();
+      }
+      return true;
+    })
+    .catch(err => {
+      console.warn('Could not load results from server:', err);
+      return false;
+    });
 }
 
 function loadStateFromLocalStorage() {
@@ -2927,6 +3032,26 @@ function updatePlayerHUD() {
   }, 100);
 }
 
+function saveResultToServer(runData) {
+  fetch('/api/results', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(runData)
+  })
+  .then(r => r.json())
+  .then(data => {
+    console.log('Result saved to server successfully');
+    if (!isParticipantOnly) {
+      loadResultsFromServer();
+    }
+  })
+  .catch(err => {
+    console.warn('Could not save result to server:', err);
+  });
+}
+
 function finishExperimentPlayback() {
   playbackState.isActive = false;
   document.removeEventListener("keydown", handlePlayerKeyDown);
@@ -2961,6 +3086,7 @@ function finishExperimentPlayback() {
   // Save to State
   state.results.unshift(newRun); // pre-pend to view latest first
   saveStateToLocalStorage();
+  saveResultToServer(newRun);
   
   // Display player summary screen
   document.getElementById("player-viewport").style.display = "none";
@@ -3118,7 +3244,17 @@ function clearAllResultsData() {
     renderRunsHistory();
     renderResultsTable();
     drawAnalyticsChart();
-    showNotification("Đã xóa toàn bộ lịch sử thử nghiệm");
+    
+    // Clear results on the server
+    fetch('/api/clear-results', { method: 'POST' })
+      .then(() => {
+        console.log('Server results cleared');
+        showNotification("Đã xóa toàn bộ lịch sử thử nghiệm trên cả máy chủ và trình duyệt");
+      })
+      .catch(err => {
+        console.warn('Could not clear results on server:', err);
+        showNotification("Đã xóa lịch sử cục bộ, nhưng gặp lỗi khi xóa trên máy chủ.");
+      });
   }
 }
 
