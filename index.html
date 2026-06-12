@@ -3,288 +3,826 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="GPA Tracker - Quản lý điểm GPA theo từng học kỳ, xuất/nhập Excel dễ dàng"/>
-  <title>GPA Tracker – Quản Lý Điểm Học Phần</title>
+  <meta name="description" content="IPI TEST - Hệ thống đánh giá nhận thức, hành vi & phản xạ chuyên sâu với độ chính xác cao"/>
+  <title>IPI TEST – Trình Đo Lường Nhận Thức & Phản Xạ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <div class="app-wrapper">
-
-    <!-- ===== SIDEBAR ===== -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
+    
+    <!-- ===== HEADER BAR ===== -->
+    <header class="app-header">
+      <div class="header-left">
         <div class="logo">
           <div class="logo-icon">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-          <div>
-            <h1 class="logo-title">GPA Tracker</h1>
-            <p class="logo-sub">Quản lý điểm học phần</p>
+          <div class="logo-text">
+            <h1 class="logo-title">IPI <span class="accent-text">TEST</span></h1>
+            <p class="logo-sub">Hệ thống đánh giá nhận thức & hành vi</p>
           </div>
         </div>
       </div>
 
-      <nav class="sidebar-nav">
-        <div class="nav-section-label">Tổng quan</div>
-        <button class="nav-item active" id="nav-overview" onclick="showOverview()">
-          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg>
-          Dashboard
-        </button>
+      <div class="header-center">
+        <div class="project-info">
+          <span class="project-tag">Project</span>
+          <input type="text" id="project-name" class="project-title-input" value="Thí nghiệm Stroop Màu sắc - Từ ngữ" />
+        </div>
+      </div>
 
-        <div class="nav-section-label">Học kỳ chính</div>
-        <button class="nav-item" onclick="showSemester(0)" id="nav-sem-0">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Học kỳ 1
+      <div class="header-right">
+        <button class="btn btn-secondary" onclick="openParticipantLink()" style="background: rgba(0, 122, 72, 0.05); color: var(--primary-accent); border-color: rgba(0, 122, 72, 0.2);" title="Sao chép link làm bài dành cho người dùng và mở ở tab mới">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; margin-right: 4px;">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+          Link Người Dùng
         </button>
-        <button class="nav-item" onclick="showSemester(1)" id="nav-sem-1">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Học kỳ 2
+        <button class="btn btn-template" onclick="openTemplatesModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Mẫu Thí Nghiệm
         </button>
+        <button class="btn btn-run" onclick="startExperiment()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Chạy Thí Nghiệm
+        </button>
+      </div>
+    </header>
 
-        <div class="nav-section-label summer-label">☀️ Kỳ hè</div>
-        <button class="nav-item summer" onclick="showSemester(2)" id="nav-sem-2">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Kỳ hè 1
+    <div class="main-layout">
+      <!-- ===== TABS NAVIGATION ===== -->
+      <nav class="app-tabs">
+        <button class="tab-btn active" id="tab-editor" onclick="switchTab('editor')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="9" y1="9" x2="21" y2="9"/></svg>
+          Giao Diện (Editor)
         </button>
-
-        <div class="nav-section-label">Học kỳ chính</div>
-        <button class="nav-item" onclick="showSemester(3)" id="nav-sem-3">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Học kỳ 3
+        <button class="tab-btn" id="tab-trials" onclick="switchTab('trials')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM21 9H3M21 15H3M12 3v18"/></svg>
+          Bảng Kích Thích (Stimuli & Trials)
         </button>
-        <button class="nav-item" onclick="showSemester(4)" id="nav-sem-4">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Học kỳ 4
+        <button class="tab-btn" id="tab-gsheet" onclick="switchTab('gsheet')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 3v18M16 3v18M2 10h20M2 16h20"/></svg>
+          Kết Nối Google Sheets
         </button>
-
-        <div class="nav-section-label summer-label">☀️ Kỳ hè</div>
-        <button class="nav-item summer" onclick="showSemester(5)" id="nav-sem-5">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Kỳ hè 2
-        </button>
-
-        <div class="nav-section-label">Học kỳ chính</div>
-        <button class="nav-item" onclick="showSemester(6)" id="nav-sem-6">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Học kỳ 5
-        </button>
-        <button class="nav-item" onclick="showSemester(7)" id="nav-sem-7">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Học kỳ 6
-        </button>
-
-        <div class="nav-section-label summer-label">☀️ Kỳ hè</div>
-        <button class="nav-item summer" onclick="showSemester(8)" id="nav-sem-8">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Kỳ hè 3
-        </button>
-
-        <div class="nav-section-label">Học kỳ chính</div>
-        <button class="nav-item" onclick="showSemester(9)" id="nav-sem-9">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Học kỳ 7
-        </button>
-        <button class="nav-item" onclick="showSemester(10)" id="nav-sem-10">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Học kỳ 8
+        <button class="tab-btn" id="tab-results" onclick="switchTab('results')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Dữ Liệu & Phân Tích
         </button>
       </nav>
 
-      <div class="sidebar-footer">
-        <button class="btn-excel import" onclick="importExcel()">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Nhập Excel
-        </button>
-        <button class="btn-excel export" onclick="exportExcel()">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Xuất Excel
-        </button>
-        <input type="file" id="excel-file-input" accept=".xlsx,.xls" style="display:none" onchange="handleFileImport(event)"/>
+      <!-- ===== CONTENT PANELS ===== -->
+      <div class="tab-content-container">
+
+        <!-- 1. EDITOR VIEW -->
+        <section id="panel-editor" class="tab-panel active">
+          <div class="editor-grid">
+            
+            <!-- Left Sidebar: Slides & Elements -->
+            <div class="editor-sidebar">
+              <div class="panel-section">
+                <div class="section-header">
+                  <h3>Danh Sách Slides</h3>
+                  <button class="icon-btn-add" onclick="addSlide()" title="Thêm Slide mới">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </button>
+                </div>
+                <div class="slides-list" id="slides-list">
+                  <!-- Generated by JS -->
+                </div>
+              </div>
+
+              <div class="panel-section">
+                <div class="section-header">
+                  <h3>Thành Phần Thí Nghiệm</h3>
+                </div>
+                <div class="components-toolbar">
+                  <button class="toolbar-item" onclick="addNewElement('text')">
+                    <span class="icon">T</span>
+                    <span class="label">Văn Bản (Text)</span>
+                  </button>
+                  <button class="toolbar-item" onclick="addNewElement('fixation')">
+                    <span class="icon">+</span>
+                    <span class="label">Tâm Cố Định (Fixation)</span>
+                  </button>
+                  <button class="toolbar-item" onclick="addNewElement('image')">
+                    <span class="icon">🖼️</span>
+                    <span class="label">Hình Ảnh (Image)</span>
+                  </button>
+                  <button class="toolbar-item" onclick="addNewElement('button')">
+                    <span class="icon">🔘</span>
+                    <span class="label">Nút Bấm (Button)</span>
+                  </button>
+                  <button class="toolbar-item" onclick="addNewElement('input')">
+                    <span class="icon">⌨️</span>
+                    <span class="label">Ô Nhập Liệu (Input)</span>
+                  </button>
+                  <button class="toolbar-item" onclick="addNewElement('zone')">
+                    <span class="icon">🎯</span>
+                    <span class="label">Khu Vực Phản Hồi (Zone)</span>
+                  </button>
+                  <button class="toolbar-item" onclick="addNewElement('choice')">
+                    <span class="icon">📝</span>
+                    <span class="label">Trắc Nghiệm (Choice)</span>
+                  </button>
+                  <button class="toolbar-item" onclick="addNewElement('audio')">
+                    <span class="icon">🔊</span>
+                    <span class="label">Âm Thanh (Audio)</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Central Workspace: Canvas -->
+            <div class="editor-workspace">
+              <div class="canvas-ruler-top">
+                <div class="ruler-marker" style="left: 0%">0px</div>
+                <div class="ruler-marker" style="left: 25%">200px</div>
+                <div class="ruler-marker" style="left: 50%">400px</div>
+                <div class="ruler-marker" style="left: 75%">600px</div>
+                <div class="ruler-marker" style="left: 100%">800px</div>
+              </div>
+              <div class="canvas-ruler-left">
+                <div class="ruler-marker" style="top: 0%">0px</div>
+                <div class="ruler-marker" style="top: 20%">100px</div>
+                <div class="ruler-marker" style="top: 40%">200px</div>
+                <div class="ruler-marker" style="top: 60%">300px</div>
+                <div class="ruler-marker" style="top: 80%">400px</div>
+                <div class="ruler-marker" style="top: 100%">500px</div>
+              </div>
+
+              <div class="canvas-outer">
+                <div class="canvas-viewport" id="canvas-viewport">
+                  <!-- The active slide elements are rendered here -->
+                  <div class="canvas-guide-h" id="guide-h"></div>
+                  <div class="canvas-guide-v" id="guide-v"></div>
+                </div>
+              </div>
+
+              <div class="editor-tips">
+                <span class="tip-badge">💡 Mẹo nhanh</span>
+                <p>Bạn có thể sử dụng biến động từ bảng trial bằng cú pháp <code>{{variable_name}}</code> trong các thuộc tính như nội dung chữ, màu sắc, hoặc đường dẫn ảnh.</p>
+              </div>
+            </div>
+
+            <!-- Right Sidebar: Inspector & Triggers -->
+            <div class="editor-inspector" id="editor-inspector">
+              <div class="inspector-empty" id="inspector-empty-state">
+                <div class="empty-icon">🎛️</div>
+                <p>Hãy chọn một thành phần trên canvas để tùy chỉnh thuộc tính & logic kích hoạt.</p>
+              </div>
+
+              <div class="inspector-content" id="inspector-active-state" style="display:none;">
+                <div class="tab-header-mini">
+                  <button class="mini-tab-btn active" id="btn-inspect-style" onclick="switchInspectorTab('style')">Định Dạng</button>
+                  <button class="mini-tab-btn" id="btn-inspect-logic" onclick="switchInspectorTab('logic')">Logic & Phản Hồi</button>
+                </div>
+
+                <!-- Inspector: Style Panel -->
+                <div class="inspector-tab-panel active" id="inspector-panel-style">
+                  <div class="inspector-group">
+                    <label class="group-label">Thành phần</label>
+                    <div class="input-row">
+                      <span class="input-prefix">ID</span>
+                      <input type="text" id="elem-id" oninput="updateSelectedElementProperty('id', this.value)" class="mono-input" />
+                    </div>
+                  </div>
+
+                  <div class="inspector-group">
+                    <label class="group-label">Vị trí & Kích thước</label>
+                    <div class="input-grid-2">
+                      <div class="input-row">
+                        <span class="input-prefix">X (Left)</span>
+                        <input type="number" id="elem-left" oninput="updateSelectedElementProperty('left', parseInt(this.value))" />
+                      </div>
+                      <div class="input-row">
+                        <span class="input-prefix">Y (Top)</span>
+                        <input type="number" id="elem-top" oninput="updateSelectedElementProperty('top', parseInt(this.value))" />
+                      </div>
+                      <div class="input-row">
+                        <span class="input-prefix">W (Rộng)</span>
+                        <input type="number" id="elem-width" oninput="updateSelectedElementProperty('width', parseInt(this.value))" />
+                      </div>
+                      <div class="input-row">
+                        <span class="input-prefix">H (Cao)</span>
+                        <input type="number" id="elem-height" oninput="updateSelectedElementProperty('height', parseInt(this.value))" />
+                      </div>
+                    </div>
+                    <div class="button-row-align">
+                      <button class="align-btn" onclick="alignSelectedElement('center-h')">Canh giữa ngang</button>
+                      <button class="align-btn" onclick="alignSelectedElement('center-v')">Canh giữa dọc</button>
+                    </div>
+                  </div>
+
+                  <div class="inspector-group" id="group-text-properties">
+                    <label class="group-label" id="label-elem-text">Văn Bản</label>
+                    <textarea id="elem-text" rows="3" oninput="updateSelectedElementProperty('text', this.value)" placeholder="Nội dung hiển thị..."></textarea>
+                    
+                    <div class="input-grid-2" style="margin-top: 8px;">
+                      <div class="input-row">
+                        <span class="input-prefix">Size</span>
+                        <input type="number" id="elem-font-size" oninput="updateSelectedElementProperty('fontSize', parseInt(this.value))" />
+                      </div>
+                      <div class="input-row">
+                        <span class="input-prefix">Color</span>
+                        <input type="text" id="elem-font-color" oninput="updateSelectedElementProperty('color', this.value)" placeholder="#ffffff hoặc {{color}}" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="inspector-group" id="group-image-properties" style="display:none;">
+                    <label class="group-label">Đường Dẫn Hình Ảnh</label>
+                    <input type="text" id="elem-src" oninput="updateSelectedElementProperty('src', this.value)" placeholder="https://example.com/stimulus.png" />
+                  </div>
+
+                  <div class="inspector-group" id="group-choice-properties" style="display:none;">
+                    <label class="group-label">Danh Sách Lựa Chọn (Options)</label>
+                    <input type="text" id="elem-options" oninput="updateSelectedElementProperty('options', this.value)" placeholder="Ví dụ: Có, Không hoặc A, B, C, D" />
+                    <small class="help-text">Phân cách các lựa chọn bằng dấu phẩy. Có thể dùng biến động như <code>{{list_options}}</code>.</small>
+                  </div>
+
+                  <div class="inspector-group" id="group-audio-properties" style="display:none;">
+                    <label class="group-label">Văn Bản Thuyết Minh (TTS)</label>
+                    <input type="text" id="elem-audio-text" oninput="updateSelectedElementProperty('text', this.value)" placeholder="Nhập câu nói hoặc dùng {{audio_text}}" />
+                    <small class="help-text">Hệ thống sẽ tự động dùng giọng nói tiếng Việt để đọc câu này khi slide xuất hiện.</small>
+                  </div>
+
+                  <div class="inspector-group">
+                    <label class="group-label">Nền & Viền</label>
+                    <div class="input-grid-2">
+                      <div class="input-row">
+                        <span class="input-prefix">Màu Nền</span>
+                        <input type="text" id="elem-bg-color" oninput="updateSelectedElementProperty('backgroundColor', this.value)" placeholder="transparent hoặc #333" />
+                      </div>
+                      <div class="input-row">
+                        <span class="input-prefix">Bo Góc</span>
+                        <input type="number" id="elem-border-radius" oninput="updateSelectedElementProperty('borderRadius', parseInt(this.value))" />
+                      </div>
+                      <div class="input-row">
+                        <span class="input-prefix">Màu Viền</span>
+                        <input type="text" id="elem-border-color" oninput="updateSelectedElementProperty('borderColor', this.value)" />
+                      </div>
+                      <div class="input-row">
+                        <span class="input-prefix">Độ Dày</span>
+                        <input type="number" id="elem-border-width" oninput="updateSelectedElementProperty('borderWidth', parseInt(this.value))" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button class="btn btn-danger btn-full" onclick="deleteSelectedElement()" style="margin-top: 15px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                    Xóa Thành Phần này
+                  </button>
+                </div>
+
+                <!-- Inspector: Logic Panel -->
+                <div class="inspector-tab-panel" id="inspector-panel-logic">
+                  <div class="logic-builder-box">
+                    <div class="section-subheader">
+                      <h4>Sự Kiện Kích Hoạt (Triggers)</h4>
+                    </div>
+                    <div class="trigger-type-select">
+                      <label>Sự kiện: </label>
+                      <select id="logic-trigger-type" onchange="updateElementTriggerType(this.value)">
+                        <option value="none">Không có (Tĩnh)</option>
+                        <option value="click">Nhấp chuột (On Click)</option>
+                        <option value="keypress">Nhấn phím (On Keypress)</option>
+                        <option value="timeout">Hết thời gian (On Timer / Timeout)</option>
+                      </select>
+                    </div>
+
+                    <!-- Condition & Action fields based on trigger type -->
+                    <div id="trigger-details-click" class="trigger-detail-group" style="display:none;">
+                      <div class="inspector-group">
+                        <label class="group-label">Hành động khi Click</label>
+                        <select id="click-action" onchange="updateTriggerAction('click', this.value)">
+                          <option value="next">Chuyển sang Slide tiếp theo</option>
+                          <option value="goto">Chuyển đến Slide cụ thể</option>
+                          <option value="end">Kết thúc Trial & Ghi nhận kết quả</option>
+                        </select>
+                        <div class="input-row" id="click-goto-slide-row" style="display:none; margin-top:8px;">
+                          <span class="input-prefix">Đến Slide</span>
+                          <select id="click-goto-slide-id" onchange="updateTriggerActionParam('click', 'slideId', this.value)"></select>
+                        </div>
+                      </div>
+
+                      <div class="inspector-group">
+                        <label class="group-label">Độ chính xác (Accuracy)</label>
+                        <label class="checkbox-container">
+                          <input type="checkbox" id="click-record-correct" onchange="updateTriggerAccuracy('click', this.checked)">
+                          Xem đây là phản hồi đúng
+                        </label>
+                      </div>
+                    </div>
+
+                    <div id="trigger-details-keypress" class="trigger-detail-group" style="display:none;">
+                      <div class="inspector-group">
+                        <label class="group-label">Phím hợp lệ (Key)</label>
+                        <input type="text" id="keypress-key" placeholder="Ví dụ: f hoặc j hoặc {{correct_key}}" oninput="updateTriggerActionParam('keypress', 'key', this.value)" />
+                        <small class="help-text">Nhập ký tự thường hoặc biến động như <code>{{correct_key}}</code>.</small>
+                      </div>
+
+                      <div class="inspector-group">
+                        <label class="group-label">Hành động khi nhấn phím</label>
+                        <select id="keypress-action" onchange="updateTriggerAction('keypress', this.value)">
+                          <option value="next">Chuyển sang Slide tiếp theo</option>
+                          <option value="goto">Chuyển đến Slide cụ thể</option>
+                          <option value="end">Kết thúc Trial & Ghi nhận kết quả</option>
+                        </select>
+                        <div class="input-row" id="keypress-goto-slide-row" style="display:none; margin-top:8px;">
+                          <span class="input-prefix">Đến Slide</span>
+                          <select id="keypress-goto-slide-id" onchange="updateTriggerActionParam('keypress', 'slideId', this.value)"></select>
+                        </div>
+                      </div>
+
+                      <div class="inspector-group">
+                        <label class="group-label">Kiểm tra Đáp án đúng</label>
+                        <div class="input-row">
+                          <span class="input-prefix">Đáp án đúng là</span>
+                          <input type="text" id="keypress-correct-key" placeholder="f hoặc {{correct_key}}" oninput="updateTriggerActionParam('keypress', 'correctKey', this.value)" />
+                        </div>
+                        <small class="help-text">Nếu phím người dùng ấn khớp với giá trị này, kết quả ghi nhận <code>correct = 1</code>, ngược lại <code>correct = 0</code>.</small>
+                      </div>
+                    </div>
+
+                    <div id="trigger-details-timeout" class="trigger-detail-group" style="display:none;">
+                      <div class="inspector-group">
+                        <label class="group-label">Thời gian chờ (ms)</label>
+                        <input type="number" id="timeout-duration" placeholder="1000" oninput="updateTriggerActionParam('timeout', 'duration', parseInt(this.value))" />
+                        <small class="help-text">1000 ms = 1 giây. Hỗ trợ biến động <code>{{timeout_ms}}</code>.</small>
+                      </div>
+
+                      <div class="inspector-group">
+                        <label class="group-label">Hành động khi hết giờ</label>
+                        <select id="timeout-action" onchange="updateTriggerAction('timeout', this.value)">
+                          <option value="next">Chuyển sang Slide tiếp theo</option>
+                          <option value="goto">Chuyển đến Slide cụ thể</option>
+                          <option value="end">Kết thúc Trial (Ghi nhận Không phản hồi)</option>
+                        </select>
+                        <div class="input-row" id="timeout-goto-slide-row" style="display:none; margin-top:8px;">
+                          <span class="input-prefix">Đến Slide</span>
+                          <select id="timeout-goto-slide-id" onchange="updateTriggerActionParam('timeout', 'slideId', this.value)"></select>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </section>
+
+        <!-- 2. TRIALS & STIMULI PANEL -->
+        <section id="panel-trials" class="tab-panel">
+          <div class="card">
+            <div class="card-header">
+              <div class="header-title-area">
+                <h3>Bảng Kịch Bản Thí Nghiệm (Stimulus & Trial Matrix)</h3>
+                <p class="subtitle">Mỗi hàng trong bảng biểu diễn một lượt chơi (trial). Khi chạy thí nghiệm, hệ thống sẽ tự động tải các giá trị tương ứng của lượt chơi đó vào các biến <code>{{biến}}</code> trên slide. <strong>Mẹo:</strong> Để trống các cột phép toán (<code>math_eq</code>, <code>math_ans</code>, <code>dual_math</code>, <code>dual_math_ans</code>) để hệ thống tự động sinh ngẫu nhiên khi chạy.</p>
+              </div>
+              <div class="header-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-secondary" onclick="addTrialRow()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Thêm hàng (Trial)
+                </button>
+                <button class="btn btn-secondary" onclick="addTrialColumn()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Thêm cột (Biến)
+                </button>
+                <button class="btn btn-secondary" onclick="fillRandomMathInTable()" title="Tự động điền các phép tính nhẩm ngẫu nhiên vào các ô trống">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+                  Tạo phép tính ngẫu nhiên
+                </button>
+                <button class="btn btn-secondary" onclick="triggerImportFile()" style="background: rgba(0, 122, 72, 0.05); color: var(--primary-accent); border-color: rgba(0, 122, 72, 0.2);" title="Nhập danh sách câu hỏi kích thích từ Excel (.xlsx, .xls) hoặc CSV">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Nhập Excel/CSV
+                </button>
+                <button class="btn btn-secondary" onclick="exportTrialTableCSV()" title="Xuất danh sách câu hỏi kích thích hiện tại ra CSV">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Xuất Excel/CSV
+                </button>
+                <input type="file" id="trial-import-input" onchange="handleTrialImport(event)" accept=".csv, .xlsx, .xls" style="display: none;" />
+              </div>
+            </div>
+
+            <div class="matrix-table-wrapper">
+              <table class="spreadsheet-table" id="trials-table">
+                <thead>
+                  <tr id="trials-header-row">
+                    <!-- Dynamic Headers -->
+                  </tr>
+                </thead>
+                <tbody id="trials-body">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card-footer-controls">
+              <div class="random-settings">
+                <label class="checkbox-container">
+                  <input type="checkbox" id="setting-randomize-trials" onchange="updateExperimentSetting('randomizeTrials', this.checked)">
+                  Xáo trộn ngẫu nhiên thứ tự các Trials (Randomize Trial Order)
+                </label>
+              </div>
+              <div class="trial-reset-area">
+                <button class="btn btn-danger-outline" onclick="resetTrialMatrixToDefault()">Khôi phục bảng mẫu</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. GOOGLE SHEETS INTEGRATION PANEL -->
+        <section id="panel-gsheet" class="tab-panel">
+          <div class="grid-2col">
+            
+            <div class="card">
+              <div class="card-header">
+                <h3>Cấu Hình Đồng Bộ Google Sheets</h3>
+              </div>
+              <div class="card-body">
+                <p class="description">
+                  Bạn có thể gửi toàn bộ kết quả đo lường (thời gian phản ứng, câu trả lời đúng/sai, chi tiết từng trial) trực tiếp lên một bảng tính Google Sheets của bạn thông qua Google Apps Script Web App.
+                </p>
+
+                <div class="form-group" style="margin-top: 20px;">
+                  <label for="gsheet-url" class="field-label">Google Apps Script Web App URL (Webhook)</label>
+                  <input type="text" id="gsheet-url" placeholder="https://script.google.com/macros/s/.../exec" oninput="updateGSheetUrl(this.value)" class="full-width-input" />
+                  <small class="help-text">Dán đường dẫn Deployment URL sau khi xuất bản Google Apps Script của bạn ở đây.</small>
+                </div>
+
+                <div class="sync-status-box" id="sync-status-box">
+                  <div class="status-indicator disconnected" id="status-indicator"></div>
+                  <span class="status-text" id="status-text">Chưa kết nối Webhook</span>
+                </div>
+
+                <div class="button-group-row">
+                  <button class="btn btn-primary" onclick="testGSheetConnection()">
+                    Kiểm Tra Kết Nối
+                  </button>
+                  <label class="checkbox-container inline-checkbox">
+                    <input type="checkbox" id="setting-auto-sync" onchange="updateExperimentSetting('autoSyncGSheet', this.checked)">
+                    Tự động đồng bộ ngay sau khi kết thúc lượt thử nghiệm
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3>Hướng Dẫn 3 Bước Cực Kỳ Đơn Giản</h3>
+              </div>
+              <div class="card-body">
+                <ol class="step-list">
+                  <li>
+                    <strong>Tạo Google Sheet mới</strong>: 
+                    Vào <a href="https://sheets.new" target="_blank" class="accent-link">sheets.new</a> để tạo một Google Sheet trống.
+                  </li>
+                  <li>
+                    <strong>Thiết lập Apps Script</strong>:
+                    Nhấp vào <strong>Extensions (Tiện ích mở rộng)</strong> &gt; <strong>Apps Script</strong>. Xóa hết code cũ đi và dán đoạn mã bên dưới vào:
+                    <div class="code-container">
+                      <pre><code id="apps-script-code">
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+  
+  // Viết tiêu đề cột nếu sheet còn trống
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow([
+      "Thời Gian", 
+      "Đối Tượng (Name)", 
+      "Thí Nghiệm", 
+      "Tổng Số Trial", 
+      "Số Câu Đúng", 
+      "Tỷ Lệ Đúng (%)", 
+      "Reaction Time Trung Bình (ms)", 
+      "Dữ Liệu Chi Tiết (JSON)"
+    ]);
+  }
+  
+  // Ghi kết quả nhận được từ IPI TEST Studio
+  sheet.appendRow([
+    new Date(),
+    data.participant || "Ẩn danh",
+    data.projectName || "Không tên",
+    data.totalTrials || 0,
+    data.correctCount || 0,
+    data.accuracy || 0,
+    data.meanRT || 0,
+    JSON.stringify(data.trials)
+  ]);
+  
+  return ContentService.createTextOutput(
+    JSON.stringify({ "status": "success" })
+  ).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  return ContentService.createTextOutput("IPI TEST Connection Test Active!");
+}
+                      </code></pre>
+                      <button class="btn btn-mini btn-copy" onclick="copyAppsScriptCode()">Sao chép code</button>
+                    </div>
+                  </li>
+                  <li>
+                    <strong>Triển khai Web App</strong>:
+                    Nhấp vào nút <strong>Deploy</strong> (Triển khai) &gt; <strong>New deployment</strong> (Triển khai mới). Chọn loại là <strong>Web app</strong>. 
+                    Mục <em>Execute as</em> chọn <strong>Me</strong>. Mục <em>Who has access</em> chọn <strong>Anyone</strong> (Bắt buộc để gửi dữ liệu không cần đăng nhập). Nhấp Deploy, cấp quyền và sao chép URL dán vào ô bên trái!
+                  </li>
+                </ol>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- 4. RESULTS & DATA DASHBOARD -->
+        <section id="panel-results" class="tab-panel">
+          
+          <!-- Analytics KPI Row -->
+          <div class="results-kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-icon accent-glow">🎯</div>
+              <div class="kpi-details">
+                <span class="kpi-value" id="kpi-accuracy">--%</span>
+                <span class="kpi-label">Độ Chính Xác Trung Bình</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon timer-glow">⚡</div>
+              <div class="kpi-details">
+                <span class="kpi-value" id="kpi-mean-rt">-- ms</span>
+                <span class="kpi-label">Reaction Time Trung Bình</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon count-glow">📊</div>
+              <div class="kpi-details">
+                <span class="kpi-value" id="kpi-runs">0</span>
+                <span class="kpi-label">Số Lượt Thực Hiện Thí Nghiệm</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon correct-glow">🏆</div>
+              <div class="kpi-details">
+                <span class="kpi-value" id="kpi-trials-total">0</span>
+                <span class="kpi-label">Tổng Số Trials Đã Thu Thập</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="results-main-grid">
+            <!-- Chart Card -->
+            <div class="card chart-container-card">
+              <div class="card-header">
+                <h3>Phân Phối Thời Gian Phản Ứng (Reaction Time Distribution)</h3>
+                <div class="chart-legend">
+                  <span class="legend-item"><span class="legend-color correct"></span>Chính xác</span>
+                  <span class="legend-item"><span class="legend-color incorrect"></span>Sai / Không phản hồi</span>
+                </div>
+              </div>
+              <div class="card-body chart-wrapper">
+                <canvas id="rt-distribution-chart" width="700" height="280"></canvas>
+              </div>
+            </div>
+
+            <!-- Participant History -->
+            <div class="card history-container-card">
+              <div class="card-header">
+                <h3>Lịch Sử Các Lượt Kiểm Tra</h3>
+                <button class="btn btn-mini btn-danger-outline" onclick="clearAllResultsData()">Xóa tất cả dữ liệu</button>
+              </div>
+              <div class="runs-history-list" id="runs-history-list">
+                <!-- History list of runs rendered here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Trials Data Table -->
+          <div class="card data-table-card">
+            <div class="card-header">
+              <div class="header-title-area">
+                <h3>Nhật Ký Dữ Liệu Từng Trial Chi Tiết (Raw Data Export)</h3>
+                <p class="subtitle">Bảng hiển thị các phản hồi của người tham gia với mốc thời gian chuẩn xác đến mili-giây, phục vụ phân tích khoa học.</p>
+              </div>
+              <div class="header-actions">
+                <button class="btn btn-secondary" onclick="exportDataToCSV()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                  Tải File CSV
+                </button>
+                <button class="btn btn-primary" onclick="syncResultsToGSheetManual()">
+                  Đồng Bộ Lên Google Sheets
+                </button>
+              </div>
+            </div>
+            
+            <div class="matrix-table-wrapper">
+              <table class="spreadsheet-table" id="results-table">
+                <thead>
+                  <tr>
+                    <th>Lượt (Run)</th>
+                    <th>Trial #</th>
+                    <th>Thời Điểm Ghi Nhận</th>
+                    <th>Phím Nhấn (Response)</th>
+                    <th>Đáp Án Đúng</th>
+                    <th>Kết Quả (Accuracy)</th>
+                    <th>Reaction Time (ms)</th>
+                    <th>Biến Động Tải Vào</th>
+                  </tr>
+                </thead>
+                <tbody id="results-body">
+                  <tr>
+                    <td colspan="8" class="empty-table-placeholder">Chưa thu thập dữ liệu thử nghiệm nào. Nhấp "Chạy Thí Nghiệm" để ghi nhận phản hồi đầu tiên!</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+        </section>
+
       </div>
-    </aside>
-
-    <!-- ===== MAIN CONTENT ===== -->
-    <main class="main-content">
-
-      <!-- Mobile header -->
-      <div class="mobile-header">
-        <button class="hamburger" onclick="toggleSidebar()">
-          <span></span><span></span><span></span>
-        </button>
-        <span class="mobile-title">GPA Tracker</span>
-      </div>
-
-      <!-- ===== OVERVIEW PAGE ===== -->
-      <section id="page-overview" class="page active">
-        <div class="page-header">
-          <div>
-            <h2 class="page-title">Dashboard Tổng Quan</h2>
-            <p class="page-subtitle">Theo dõi điểm GPA toàn bộ chương trình học</p>
-          </div>
-          <div class="cumulative-gpa-badge" id="overall-gpa-badge">
-            <span class="badge-label">GPA Tích Lũy</span>
-            <span class="badge-value" id="overall-gpa-value">—</span>
-            <span class="badge-rank" id="overall-gpa-rank"></span>
-          </div>
-        </div>
-
-        <!-- Stats row -->
-        <div class="stats-grid" id="stats-grid"></div>
-
-        <!-- Chart -->
-        <div class="card chart-card">
-          <div class="card-header">
-            <h3>Biểu Đồ GPA Theo Học Kỳ</h3>
-          </div>
-          <div class="chart-wrapper">
-            <canvas id="gpaChart" height="260"></canvas>
-          </div>
-        </div>
-
-        <!-- Semester cards summary -->
-        <div class="card">
-          <div class="card-header">
-            <h3>Tổng Hợp Các Học Kỳ</h3>
-          </div>
-          <div class="semester-summary-grid" id="semester-summary-grid"></div>
-        </div>
-      </section>
-
-      <!-- ===== SEMESTER PAGE ===== -->
-      <section id="page-semester" class="page">
-        <div class="page-header">
-          <div>
-            <h2 class="page-title" id="sem-page-title">Học kỳ</h2>
-            <p class="page-subtitle" id="sem-page-subtitle">Quản lý môn học và điểm số</p>
-          </div>
-          <div class="sem-gpa-badge" id="sem-gpa-badge">
-            <span class="badge-label">GPA Học Kỳ</span>
-            <span class="badge-value" id="sem-gpa-value">—</span>
-            <span class="badge-rank" id="sem-gpa-rank"></span>
-          </div>
-        </div>
-
-        <!-- Sem stats -->
-        <div class="sem-stats-row" id="sem-stats-row"></div>
-
-        <!-- Subject table -->
-        <div class="card table-card">
-          <div class="card-header">
-            <h3 id="sem-table-title">Danh Sách Môn Học</h3>
-            <button class="btn-add" onclick="addSubject()">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
-              Thêm môn
-            </button>
-          </div>
-          <div class="table-wrapper">
-            <table class="subject-table" id="subject-table">
-              <thead>
-                <tr>
-                  <th class="col-stt">STT</th>
-                  <th class="col-code">Mã MH</th>
-                  <th class="col-name">Tên Môn Học</th>
-                  <th class="col-credits">Số TC</th>
-                  <th class="col-score">Điểm QT</th>
-                  <th class="col-score">Điểm GK</th>
-                  <th class="col-score">Điểm CK</th>
-                  <th class="col-score">Điểm TK</th>
-                  <th class="col-grade">Điểm Chữ</th>
-                  <th class="col-gpa">GPA (4)</th>
-                  <th class="col-action">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody id="subject-tbody"></tbody>
-              <tfoot id="subject-tfoot"></tfoot>
-            </table>
-          </div>
-          <div class="table-empty" id="table-empty">
-            <div class="empty-icon">📚</div>
-            <p>Chưa có môn học nào</p>
-            <button class="btn-add-empty" onclick="addSubject()">Thêm môn học đầu tiên</button>
-          </div>
-        </div>
-
-        <!-- Grade guide -->
-        <div class="card grade-guide-card">
-          <div class="card-header">
-            <h3>Bảng Quy Đổi Điểm</h3>
-          </div>
-          <div class="grade-guide-table-wrap">
-            <table class="grade-guide-table">
-              <thead>
-                <tr>
-                  <th>Điểm hệ 10</th>
-                  <th>Điểm chữ</th>
-                  <th>Hệ 4</th>
-                  <th>Xếp loại</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="grade-row-A">
-                  <td>8.5 – 10</td>
-                  <td><span class="grade-chip grade-A">A</span></td>
-                  <td><strong>4.0</strong></td>
-                  <td><span class="rank-chip" style="color:#10b981;background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.3)">🏆 Xuất sắc / Giỏi</span></td>
-                </tr>
-                <tr class="grade-row-B+">
-                  <td>8.0 – 8.4</td>
-                  <td><span class="grade-chip grade-B+">B+</span></td>
-                  <td><strong>3.5</strong></td>
-                  <td><span class="rank-chip" style="color:#a78bfa;background:rgba(167,139,250,0.15);border-color:rgba(167,139,250,0.3)">👍 Khá</span></td>
-                </tr>
-                <tr class="grade-row-B">
-                  <td>7.0 – 7.9</td>
-                  <td><span class="grade-chip grade-B">B</span></td>
-                  <td><strong>3.0</strong></td>
-                  <td><span class="rank-chip" style="color:#a78bfa;background:rgba(167,139,250,0.15);border-color:rgba(167,139,250,0.3)">👍 Khá</span></td>
-                </tr>
-                <tr class="grade-row-C+">
-                  <td>6.5 – 6.9</td>
-                  <td><span class="grade-chip grade-C+">C+</span></td>
-                  <td><strong>2.5</strong></td>
-                  <td><span class="rank-chip" style="color:#fbbf24;background:rgba(251,191,36,0.15);border-color:rgba(251,191,36,0.3)">📊 Trung bình</span></td>
-                </tr>
-                <tr class="grade-row-C">
-                  <td>5.5 – 6.4</td>
-                  <td><span class="grade-chip grade-C">C</span></td>
-                  <td><strong>2.0</strong></td>
-                  <td><span class="rank-chip" style="color:#fbbf24;background:rgba(251,191,36,0.15);border-color:rgba(251,191,36,0.3)">📊 Trung bình</span></td>
-                </tr>
-                <tr class="grade-row-D+">
-                  <td>5.0 – 5.4</td>
-                  <td><span class="grade-chip grade-D+">D+</span></td>
-                  <td><strong>1.5</strong></td>
-                  <td><span class="rank-chip" style="color:#fb923c;background:rgba(249,115,22,0.15);border-color:rgba(249,115,22,0.3)">⚠️ Yếu</span></td>
-                </tr>
-                <tr class="grade-row-D">
-                  <td>4.0 – 4.9</td>
-                  <td><span class="grade-chip grade-D">D</span></td>
-                  <td><strong>1.0</strong></td>
-                  <td><span class="rank-chip" style="color:#fb923c;background:rgba(249,115,22,0.15);border-color:rgba(249,115,22,0.3)">⚠️ Yếu</span></td>
-                </tr>
-                <tr class="grade-row-F">
-                  <td>&lt; 4.0</td>
-                  <td><span class="grade-chip grade-F">F</span></td>
-                  <td><strong>0</strong></td>
-                  <td><span class="rank-chip" style="color:#f87171;background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3)">❌ Kém / Rớt</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-    </main>
+    </div>
   </div>
 
-  <!-- Notification toast -->
-  <div class="toast" id="toast"></div>
+  <!-- ===== MODAL: EXAMPLES & TEMPLATES ===== -->
+  <div class="modal-overlay" id="modal-templates">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Chọn Mẫu Thí Nghiệm Nghiên Cứu Hành Vi</h2>
+        <button class="modal-close" onclick="closeTemplatesModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="description">Các mẫu dưới đây được thiết kế sẵn theo đúng chuẩn các thí nghiệm tâm lý kinh điển. Khi chọn, hệ thống sẽ tự động cấu hình các slides và bảng trials tương ứng.</p>
+        
+        <div class="templates-grid">
+          
+          <div class="template-card" onclick="loadTemplate('type1_1')">
+            <div class="template-header">
+              <span class="template-badge" style="background: rgba(0, 122, 72, 0.15); color: #007a48; border: 1px solid rgba(0, 122, 72, 0.3);">Nhóm 1</span>
+              <h3>Tập Trung Cao (Multi-Task)</h3>
+            </div>
+            <p class="template-desc">Bài test tích hợp đa nhiệm cao độ: Ghi nhớ câu hiển thị (15s), Giải phép tính nhẩm, Khoanh trắc nghiệm Tiếng Anh, và Nhiệm vụ kép (Dual-Task) kết hợp ghi nhớ đồng thời phép tính & câu từ.</p>
+            <div class="template-meta">
+              <span>🧠 Tập trung cao độ</span>
+              <span>🔢 2 trials</span>
+            </div>
+          </div>
 
+          <div class="template-card" onclick="loadTemplate('gonogo')">
+            <div class="template-header">
+              <span class="template-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">Nhóm 2</span>
+              <h3>Phản Xạ Thói Quen (Go/No-Go)</h3>
+            </div>
+            <p class="template-desc">Bài test phản xạ theo thói quen: Nhấp phím thật nhanh khi thấy Hình Tròn (Go) và tuyệt đối không phản ứng khi thấy Hình Vuông (No-Go). Lặp đi lặp lại nhiều lần để tạo thói quen phản xạ.</p>
+            <div class="template-meta">
+              <span>🎯 Phản xạ & Ức chế</span>
+              <span>🔢 10 trials</span>
+            </div>
+          </div>
+
+          <div class="template-card" onclick="loadTemplate('group3_audio')">
+            <div class="template-header">
+              <span class="template-badge" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3);">Nhóm 3</span>
+              <h3>Trí Nhớ Thính Giác (Audio Memory)</h3>
+            </div>
+            <p class="template-desc">Bài test nghe hiểu lời nhạc/âm thanh: Hệ thống phát ngẫu nhiên câu hát hoặc đoạn âm thanh Việt hóa, sau đó yêu cầu người chơi ghi nhớ và nhập lại chính xác lời đã nghe.</p>
+            <div class="template-meta">
+              <span>🔊 Nghe hiểu & Ghi nhớ</span>
+              <span>🔢 3 trials</span>
+            </div>
+          </div>
+
+          <div class="template-card" onclick="loadTemplate('stroop')">
+            <div class="template-header">
+              <span class="template-badge badge-red">Kinh Điển</span>
+              <h3>Hiệu Ứng Stroop (Stroop Effect)</h3>
+            </div>
+            <p class="template-desc">Đo lường sự can thiệp nhận thức khi màu chữ và nghĩa của từ xung đột nhau (ví dụ: chữ "ĐỎ" tô màu xanh lá).</p>
+            <div class="template-meta">
+              <span>⏱️ Đo Reaction Time</span>
+              <span>🔢 12 trials</span>
+            </div>
+          </div>
+
+          <div class="template-card" onclick="loadTemplate('lexical')">
+            <div class="template-header">
+              <span class="template-badge badge-blue">Ngôn Ngữ</span>
+              <h3>Quyết Định Từ Vựng (Lexical Task)</h3>
+            </div>
+            <p class="template-desc">Phân loại nhanh chuỗi ký tự hiển thị trên màn hình có phải là từ có nghĩa hay không (ví dụ: "BANANA" vs "BANAAN").</p>
+            <div class="template-meta">
+              <span>⏱️ Đo nhận diện từ</span>
+              <span>🔢 8 trials</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FULLSCREEN EXPERIMENT PLAYER OVERLAY ===== -->
+  <div class="player-overlay" id="experiment-player">
+    
+    <!-- Setup Screen -->
+    <div class="player-setup-box" id="player-setup-box">
+      <h2>Chuẩn Bị Khởi Chạy Thí Nghiệm</h2>
+      <p>Thí nghiệm: <strong id="player-setup-project-name">Thí nghiệm Stroop</strong></p>
+      
+      <div class="form-group" style="margin-top: 20px;">
+        <label for="participant-name">Tên / Mã số người tham gia (Participant Code)</label>
+        <input type="text" id="participant-name" value="Participant_001" placeholder="P_001" />
+        <small class="help-text">Thông tin này dùng để phân tách dữ liệu kết quả xuất ra Excel/Google Sheet.</small>
+      </div>
+
+      <div class="form-group" style="margin-top: 15px;">
+        <label for="player-test-group">Chọn Nhóm Thí Nghiệm (Test Group)</label>
+        <select id="player-test-group" onchange="handlePlayerGroupChange(this.value)" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.3); color: #fff; outline: none; font-family: var(--font-sans); font-size: 14px; cursor: pointer;">
+          <option value="" disabled selected>-- Chọn nhóm bài test để bắt đầu --</option>
+          <option value="current">Thiết kế hiện tại (Active Project)</option>
+          <option value="type1_1">Nhóm 1: Tập Trung Cao (Multi-Task)</option>
+          <option value="gonogo">Nhóm 2: Phản Xạ Thói Quen (Go/No-Go)</option>
+          <option value="group3_audio">Nhóm 3: Trí Nhớ Thính Giác (Audio Memory)</option>
+        </select>
+        <small class="help-text">Chọn nhóm bài tập hành vi muốn thực hiện kiểm tra.</small>
+      </div>
+
+      <div class="player-instructions">
+        <h3>Hướng dẫn chung:</h3>
+        <p>Vui lòng ngồi thẳng, tập trung vào tâm màn hình và phản hồi nhanh nhất, chính xác nhất có thể bằng chuột hoặc bàn phím tùy theo yêu cầu của từng slide.</p>
+      </div>
+
+      <div class="player-setup-actions">
+        <button class="btn btn-secondary" onclick="stopExperiment()">Hủy Bỏ</button>
+        <button class="btn btn-run" onclick="launchActivePlayback()">BẮT ĐẦU NGAY</button>
+      </div>
+    </div>
+
+    <!-- Active Trial Running Screen -->
+    <div class="player-viewport" id="player-viewport">
+      <!-- Active elements will be rendered here dynamically with variables injected -->
+    </div>
+
+    <!-- Feedback Indicator Toast inside Player -->
+    <div class="player-feedback-indicator" id="player-feedback">
+      Đúng!
+    </div>
+
+    <!-- Micro Precision HUD Debugging (Scientific transparency) -->
+    <div class="player-hud-bar" id="player-hud">
+      <span>Trial: <span id="hud-trial-num">1</span> / <span id="hud-trial-total">12</span></span>
+      <span>|</span>
+      <span>Precision Timer: <span id="hud-timer">performance.now()</span></span>
+      <span>|</span>
+      <span>Last response RT: <span id="hud-last-rt">0ms</span></span>
+    </div>
+
+    <!-- Trial Complete Screen -->
+    <div class="player-complete-box" id="player-complete-box" style="display:none;">
+      <div class="success-icon">🎉</div>
+      <h2>Thí Nghiệm Hoàn Tất!</h2>
+      <p>Cảm ơn bạn đã tham gia thực hiện các thử thách hành vi.</p>
+      
+      <div class="player-stats-preview">
+        <div class="stat-box">
+          <span class="val" id="player-res-accuracy">92%</span>
+          <span class="lbl">Tỷ lệ chính xác</span>
+        </div>
+        <div class="stat-box">
+          <span class="val" id="player-res-rt">342 ms</span>
+          <span class="lbl">Reaction Time trung bình</span>
+        </div>
+      </div>
+
+      <div class="sync-status-indicator-player" id="player-sync-status">
+        Đang đồng bộ dữ liệu nghiên cứu lên Google Sheets...
+      </div>
+
+      <div class="player-setup-actions">
+        <button class="btn btn-primary" onclick="closePlayerAndShowResults()">Xem Báo Cáo Chi Tiết</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast-notification" class="toast-notification">Đã lưu thay đổi</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
