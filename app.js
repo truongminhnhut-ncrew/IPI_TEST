@@ -121,12 +121,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function openParticipantLink() {
-  // index.html is the clean participant page
-  const userUrl = window.location.origin + '/index.html';
-  
-  // Try to copy to clipboard
+  // Build participant URL - works on both localhost and GitHub Pages
+  const base = window.location.origin + window.location.pathname.replace(/admin\.html$/, '').replace(/\/$/, '');
+  const userUrl = base + '/index.html';
+
   navigator.clipboard.writeText(userUrl).then(() => {
-    showNotification("Đã sao chép link khảo sát vào bộ nhớ tạm! Gửi cho người tham gia nhé.");
+    showNotification("Đã sao chép link khảo sát! Gửi cho người tham gia nhé.");
     window.open(userUrl, "_blank");
   }).catch(() => {
     window.open(userUrl, "_blank");
