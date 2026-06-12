@@ -121,14 +121,14 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function openParticipantLink() {
-  const userUrl = window.location.origin + window.location.pathname + "?role=participant";
+  // index.html is the clean participant page
+  const userUrl = window.location.origin + '/index.html';
   
   // Try to copy to clipboard
   navigator.clipboard.writeText(userUrl).then(() => {
-    showNotification("Đã sao chép link người tham gia vào bộ nhớ tạm!");
+    showNotification("Đã sao chép link khảo sát vào bộ nhớ tạm! Gửi cho người tham gia nhé.");
     window.open(userUrl, "_blank");
   }).catch(() => {
-    // Fallback if clipboard fails
     window.open(userUrl, "_blank");
   });
 }

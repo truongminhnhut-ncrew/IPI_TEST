@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 const PORT = process.env.PORT || 8080;
 
@@ -16,12 +17,33 @@ const mimeTypes = {
   '.ico': 'image/x-icon'
 };
 
+// Get local IP for display
+function getLocalIP() {
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) return net.address;
+    }
+  }
+  return 'localhost';
+}
+
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
-  let filePath = url.pathname === '/' ? 'index.html' : url.pathname.substring(1);
+  let pathname = url.pathname;
+
+  // Route mapping
+  let filePath;
+  if (pathname === '/' || pathname === '/index.html') {
+    filePath = 'index.html';   // Participant page
+  } else if (pathname === '/admin' || pathname === '/admin.html') {
+    filePath = 'admin.html';   // Admin page
+  } else {
+    filePath = pathname.substring(1);
+  }
 
   // Sanitize path to prevent directory traversal
-  filePath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
+  filePath = path.normalize(filePath).replace(/^(\.\.[\\/])+/, '');
   const fullPath = path.join(__dirname, filePath);
 
   if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
@@ -36,7 +58,16 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`IPI TEST Server is running at http://localhost:${PORT}`);
-  console.log(`Share with other devices: http://<YOUR_IP_ADDRESS>:${PORT}`);
-  console.log(`Participant link: http://<YOUR_IP_ADDRESS>:${PORT}/?role=participant`);
+  const ip = getLocalIP();
+  console.log('');
+  console.log('╔══════════════════════════════════════════════════╗');
+  console.log('║           IPI TEST SERVER - RUNNING              ║');
+  console.log('╠══════════════════════════════════════════════════╣');
+  console.log(`║  👤 Link Người Dùng (gửi cho người tham gia):    ║`);
+  console.log(`║     http://${ip}:${PORT}/                          `);
+  console.log(`║                                                   ║`);
+  console.log(`║  🔐 Link Quản Trị (chỉ dành cho bạn):           ║`);
+  console.log(`║     http://${ip}:${PORT}/admin                     `);
+  console.log('╚══════════════════════════════════════════════════╝');
+  console.log('');
 });

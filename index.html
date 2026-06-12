@@ -3,719 +3,469 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="IPI TEST - Hệ thống đánh giá nhận thức, hành vi & phản xạ chuyên sâu với độ chính xác cao"/>
-  <title>IPI TEST – Trình Đo Lường Nhận Thức & Phản Xạ</title>
+  <meta name="description" content="IPI TEST - Tham gia khảo sát đánh giá nhận thức & hành vi"/>
+  <title>IPI TEST – Khảo Sát Nhận Thức & Hành Vi</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css"/>
+  <style>
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #007a48;
+      --green-light: #10b981;
+      --green-glow: rgba(0,122,72,0.18);
+      --red: #f43f5e;
+      --bg: #0b0f1a;
+      --bg2: #111827;
+      --bg3: #1a2235;
+      --border: rgba(255,255,255,0.08);
+      --text: #f1f5f9;
+      --text2: #94a3b8;
+      --font: 'Outfit', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --r: 14px;
+    }
+
+    html, body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(0,122,72,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 85%, rgba(244,63,94,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 55% 50%, rgba(16,185,129,0.05) 0%, transparent 50%);
+    }
+
+    /* ===== WELCOME SCREEN ===== */
+    #welcome-screen {
+      position: relative; z-index: 10;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 24px 16px;
+      gap: 32px;
+    }
+
+    /* Logo */
+    .ws-logo {
+      display: flex; align-items: center; gap: 14px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .ws-logo-icon {
+      width: 54px; height: 54px;
+      background: linear-gradient(135deg, var(--green), var(--red));
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 30px var(--green-glow);
+    }
+    .ws-logo-icon svg { width: 28px; height: 28px; color: #fff; }
+    .ws-logo-title { font-size: 28px; font-weight: 800; line-height: 1; }
+    .ws-logo-title span {
+      background: linear-gradient(90deg, var(--green-light), var(--red));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .ws-logo-sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+    /* Welcome card */
+    .ws-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 40px 44px;
+      max-width: 560px; width: 100%;
+      text-align: center;
+      backdrop-filter: blur(20px);
+      animation: fadeUp 0.7s 0.1s ease both;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .ws-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(0,122,72,0.15);
+      border: 1px solid rgba(0,122,72,0.3);
+      color: var(--green-light);
+      padding: 4px 14px; border-radius: 100px;
+      font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.8px; margin-bottom: 20px;
+    }
+    .ws-badge::before { content: '●'; font-size: 8px; animation: pulse 1.5s infinite; }
+
+    .ws-card h1 { font-size: 26px; font-weight: 800; margin-bottom: 10px; line-height: 1.3; }
+    .ws-card h1 span { color: var(--green-light); }
+    .ws-card > p { color: var(--text2); font-size: 14.5px; line-height: 1.7; margin-bottom: 32px; }
+
+    /* Form */
+    .ws-form { display: flex; flex-direction: column; gap: 16px; text-align: left; }
+
+    .ws-label {
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--text2); margin-bottom: 6px; display: block;
+    }
+
+    .ws-input {
+      width: 100%; padding: 13px 16px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: var(--r); color: var(--text);
+      font-family: var(--font); font-size: 15px;
+      outline: none; transition: border 0.2s, box-shadow 0.2s;
+    }
+    .ws-input:focus {
+      border-color: var(--green-light);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+    }
+    .ws-input::placeholder { color: var(--text2); }
+
+    .ws-select {
+      width: 100%; padding: 13px 16px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: var(--r); color: var(--text);
+      font-family: var(--font); font-size: 15px;
+      outline: none; cursor: pointer;
+      transition: border 0.2s, box-shadow 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+    }
+    .ws-select:focus {
+      border-color: var(--green-light);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+    }
+    .ws-select option { background: #1a2235; color: var(--text); }
+
+    .ws-hint { font-size: 12px; color: var(--text2); margin-top: 5px; }
+
+    .ws-instructions {
+      background: rgba(0,122,72,0.08);
+      border: 1px solid rgba(0,122,72,0.2);
+      border-radius: var(--r); padding: 16px;
+      font-size: 13.5px; color: var(--text2); line-height: 1.7;
+    }
+    .ws-instructions strong { color: var(--text); font-weight: 600; }
+
+    .ws-btn {
+      width: 100%; padding: 15px;
+      background: linear-gradient(135deg, var(--green), #047857);
+      border: none; border-radius: var(--r);
+      color: #fff; font-family: var(--font);
+      font-size: 16px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(0,122,72,0.4);
+      letter-spacing: 0.3px; margin-top: 4px;
+    }
+    .ws-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,122,72,0.5); }
+    .ws-btn:active { transform: translateY(0); }
+
+    .ws-footer {
+      font-size: 12px; color: var(--text2);
+      text-align: center;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+
+    /* ===== PLAYER OVERLAY (fullscreen) ===== */
+    #experiment-player {
+      display: none;
+      position: fixed; inset: 0; z-index: 100;
+      background: #0b0f1a;
+      flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    #experiment-player.active { display: flex; }
+
+    /* Setup box inside player (not used here since we do setup on welcome screen) */
+    .player-setup-box { display: none !important; }
+
+    /* Viewport */
+    .player-viewport {
+      width: 100%; height: 100%;
+      position: relative;
+      display: none;
+    }
+
+    /* HUD bar */
+    .player-hud-bar {
+      position: fixed; top: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+      display: none; align-items: center; gap: 20px;
+      padding: 8px 24px; font-size: 12px;
+      font-family: var(--mono); color: var(--text2);
+      z-index: 200;
+    }
+
+    /* Feedback */
+    .player-feedback-indicator {
+      position: fixed; top: 60px; left: 50%;
+      transform: translateX(-50%) scale(0);
+      background: var(--green-light); color: #fff;
+      padding: 8px 22px; border-radius: 100px;
+      font-weight: 700; font-size: 14px;
+      z-index: 300; transition: transform 0.15s;
+    }
+    .player-feedback-indicator.show { transform: translateX(-50%) scale(1); }
+
+    /* Complete box */
+    .player-complete-box {
+      display: none;
+      position: fixed; inset: 0; z-index: 150;
+      background: var(--bg);
+      flex-direction: column; align-items: center; justify-content: center;
+      padding: 32px 20px; text-align: center;
+    }
+    .player-complete-box.show { display: flex; }
+
+    .complete-icon { font-size: 64px; margin-bottom: 16px; animation: pop 0.5s ease; }
+    .player-complete-box h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .player-complete-box p { color: var(--text2); font-size: 15px; margin-bottom: 28px; }
+
+    .complete-stats {
+      display: flex; gap: 20px; margin-bottom: 28px;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .stat-box {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px 32px;
+      min-width: 140px;
+    }
+    .stat-box .val { display: block; font-size: 32px; font-weight: 800; color: var(--green-light); }
+    .stat-box .lbl { font-size: 12px; color: var(--text2); margin-top: 4px; display: block; }
+
+    .sync-badge {
+      padding: 10px 20px; border-radius: 100px;
+      font-size: 13px; font-weight: 600;
+      background: rgba(0,122,72,0.15);
+      border: 1px solid rgba(0,122,72,0.3);
+      color: var(--green-light); margin-bottom: 24px;
+    }
+
+    .restart-btn {
+      padding: 14px 36px;
+      background: linear-gradient(135deg, var(--green), #047857);
+      border: none; border-radius: var(--r);
+      color: #fff; font-family: var(--font);
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(0,122,72,0.4);
+    }
+    .restart-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,122,72,0.5); }
+
+    /* Hidden elements app.js needs but shouldn't show on user page */
+    #player-sync-status { display: none !important; }
+
+    /* Toast */
+    .toast-notification {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--bg3); border: 1px solid var(--green-light);
+      color: var(--text); padding: 12px 22px;
+      border-radius: var(--r); font-size: 14px; font-weight: 500;
+      z-index: 9999; transition: transform 0.3s ease;
+      white-space: nowrap;
+    }
+    .toast-notification.show { transform: translateX(-50%) translateY(0); }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+    }
+    @keyframes pop {
+      0% { transform: scale(0.5); } 70% { transform: scale(1.15); } 100% { transform: scale(1); }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 600px) {
+      .ws-card { padding: 28px 20px; }
+      .ws-card h1 { font-size: 21px; }
+      .ws-logo-title { font-size: 22px; }
+      .complete-stats { gap: 12px; }
+      .stat-box { padding: 16px 24px; min-width: 120px; }
+    }
+  </style>
 </head>
 <body>
 
-  <div class="app-wrapper">
-    
-    <!-- ===== HEADER BAR ===== -->
-    <header class="app-header">
-      <div class="header-left">
-        <div class="logo">
-          <div class="logo-icon">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="logo-text">
-            <h1 class="logo-title">IPI <span class="accent-text">TEST</span></h1>
-            <p class="logo-sub">Hệ thống đánh giá nhận thức & hành vi</p>
-          </div>
-        </div>
+  <!-- ===== WELCOME / SETUP SCREEN ===== -->
+  <div id="welcome-screen">
+
+    <!-- Logo -->
+    <div class="ws-logo">
+      <div class="ws-logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </div>
-
-      <div class="header-center">
-        <div class="project-info">
-          <span class="project-tag">Project</span>
-          <input type="text" id="project-name" class="project-title-input" value="Thí nghiệm Stroop Màu sắc - Từ ngữ" />
-        </div>
-      </div>
-
-      <div class="header-right">
-        <button class="btn btn-secondary" onclick="openParticipantLink()" style="background: rgba(0, 122, 72, 0.05); color: var(--primary-accent); border-color: rgba(0, 122, 72, 0.2);" title="Sao chép link làm bài dành cho người dùng và mở ở tab mới">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; margin-right: 4px;">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-          </svg>
-          Link Người Dùng
-        </button>
-        <button class="btn btn-template" onclick="openTemplatesModal()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-          Mẫu Thí Nghiệm
-        </button>
-        <button class="btn btn-run" onclick="startExperiment()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
-          Chạy Thí Nghiệm
-        </button>
-      </div>
-    </header>
-
-    <div class="main-layout">
-      <!-- ===== TABS NAVIGATION ===== -->
-      <nav class="app-tabs">
-        <button class="tab-btn active" id="tab-editor" onclick="switchTab('editor')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="9" y1="9" x2="21" y2="9"/></svg>
-          Giao Diện (Editor)
-        </button>
-        <button class="tab-btn" id="tab-trials" onclick="switchTab('trials')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM21 9H3M21 15H3M12 3v18"/></svg>
-          Bảng Kích Thích (Stimuli & Trials)
-        </button>
-
-        <button class="tab-btn" id="tab-results" onclick="switchTab('results')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Dữ Liệu & Phân Tích
-        </button>
-      </nav>
-
-      <!-- ===== CONTENT PANELS ===== -->
-      <div class="tab-content-container">
-
-        <!-- 1. EDITOR VIEW -->
-        <section id="panel-editor" class="tab-panel active">
-          <div class="editor-grid">
-            
-            <!-- Left Sidebar: Slides & Elements -->
-            <div class="editor-sidebar">
-              <div class="panel-section">
-                <div class="section-header">
-                  <h3>Danh Sách Slides</h3>
-                  <button class="icon-btn-add" onclick="addSlide()" title="Thêm Slide mới">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  </button>
-                </div>
-                <div class="slides-list" id="slides-list">
-                  <!-- Generated by JS -->
-                </div>
-              </div>
-
-              <div class="panel-section">
-                <div class="section-header">
-                  <h3>Thành Phần Thí Nghiệm</h3>
-                </div>
-                <div class="components-toolbar">
-                  <button class="toolbar-item" onclick="addNewElement('text')">
-                    <span class="icon">T</span>
-                    <span class="label">Văn Bản (Text)</span>
-                  </button>
-                  <button class="toolbar-item" onclick="addNewElement('fixation')">
-                    <span class="icon">+</span>
-                    <span class="label">Tâm Cố Định (Fixation)</span>
-                  </button>
-                  <button class="toolbar-item" onclick="addNewElement('image')">
-                    <span class="icon">🖼️</span>
-                    <span class="label">Hình Ảnh (Image)</span>
-                  </button>
-                  <button class="toolbar-item" onclick="addNewElement('button')">
-                    <span class="icon">🔘</span>
-                    <span class="label">Nút Bấm (Button)</span>
-                  </button>
-                  <button class="toolbar-item" onclick="addNewElement('input')">
-                    <span class="icon">⌨️</span>
-                    <span class="label">Ô Nhập Liệu (Input)</span>
-                  </button>
-                  <button class="toolbar-item" onclick="addNewElement('zone')">
-                    <span class="icon">🎯</span>
-                    <span class="label">Khu Vực Phản Hồi (Zone)</span>
-                  </button>
-                  <button class="toolbar-item" onclick="addNewElement('choice')">
-                    <span class="icon">📝</span>
-                    <span class="label">Trắc Nghiệm (Choice)</span>
-                  </button>
-                  <button class="toolbar-item" onclick="addNewElement('audio')">
-                    <span class="icon">🔊</span>
-                    <span class="label">Âm Thanh (Audio)</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Central Workspace: Canvas -->
-            <div class="editor-workspace">
-              <div class="canvas-ruler-top">
-                <div class="ruler-marker" style="left: 0%">0px</div>
-                <div class="ruler-marker" style="left: 25%">200px</div>
-                <div class="ruler-marker" style="left: 50%">400px</div>
-                <div class="ruler-marker" style="left: 75%">600px</div>
-                <div class="ruler-marker" style="left: 100%">800px</div>
-              </div>
-              <div class="canvas-ruler-left">
-                <div class="ruler-marker" style="top: 0%">0px</div>
-                <div class="ruler-marker" style="top: 20%">100px</div>
-                <div class="ruler-marker" style="top: 40%">200px</div>
-                <div class="ruler-marker" style="top: 60%">300px</div>
-                <div class="ruler-marker" style="top: 80%">400px</div>
-                <div class="ruler-marker" style="top: 100%">500px</div>
-              </div>
-
-              <div class="canvas-outer">
-                <div class="canvas-viewport" id="canvas-viewport">
-                  <!-- The active slide elements are rendered here -->
-                  <div class="canvas-guide-h" id="guide-h"></div>
-                  <div class="canvas-guide-v" id="guide-v"></div>
-                </div>
-              </div>
-
-              <div class="editor-tips">
-                <span class="tip-badge">💡 Mẹo nhanh</span>
-                <p>Bạn có thể sử dụng biến động từ bảng trial bằng cú pháp <code>{{variable_name}}</code> trong các thuộc tính như nội dung chữ, màu sắc, hoặc đường dẫn ảnh.</p>
-              </div>
-            </div>
-
-            <!-- Right Sidebar: Inspector & Triggers -->
-            <div class="editor-inspector" id="editor-inspector">
-              <div class="inspector-empty" id="inspector-empty-state">
-                <div class="empty-icon">🎛️</div>
-                <p>Hãy chọn một thành phần trên canvas để tùy chỉnh thuộc tính & logic kích hoạt.</p>
-              </div>
-
-              <div class="inspector-content" id="inspector-active-state" style="display:none;">
-                <div class="tab-header-mini">
-                  <button class="mini-tab-btn active" id="btn-inspect-style" onclick="switchInspectorTab('style')">Định Dạng</button>
-                  <button class="mini-tab-btn" id="btn-inspect-logic" onclick="switchInspectorTab('logic')">Logic & Phản Hồi</button>
-                </div>
-
-                <!-- Inspector: Style Panel -->
-                <div class="inspector-tab-panel active" id="inspector-panel-style">
-                  <div class="inspector-group">
-                    <label class="group-label">Thành phần</label>
-                    <div class="input-row">
-                      <span class="input-prefix">ID</span>
-                      <input type="text" id="elem-id" oninput="updateSelectedElementProperty('id', this.value)" class="mono-input" />
-                    </div>
-                  </div>
-
-                  <div class="inspector-group">
-                    <label class="group-label">Vị trí & Kích thước</label>
-                    <div class="input-grid-2">
-                      <div class="input-row">
-                        <span class="input-prefix">X (Left)</span>
-                        <input type="number" id="elem-left" oninput="updateSelectedElementProperty('left', parseInt(this.value))" />
-                      </div>
-                      <div class="input-row">
-                        <span class="input-prefix">Y (Top)</span>
-                        <input type="number" id="elem-top" oninput="updateSelectedElementProperty('top', parseInt(this.value))" />
-                      </div>
-                      <div class="input-row">
-                        <span class="input-prefix">W (Rộng)</span>
-                        <input type="number" id="elem-width" oninput="updateSelectedElementProperty('width', parseInt(this.value))" />
-                      </div>
-                      <div class="input-row">
-                        <span class="input-prefix">H (Cao)</span>
-                        <input type="number" id="elem-height" oninput="updateSelectedElementProperty('height', parseInt(this.value))" />
-                      </div>
-                    </div>
-                    <div class="button-row-align">
-                      <button class="align-btn" onclick="alignSelectedElement('center-h')">Canh giữa ngang</button>
-                      <button class="align-btn" onclick="alignSelectedElement('center-v')">Canh giữa dọc</button>
-                    </div>
-                  </div>
-
-                  <div class="inspector-group" id="group-text-properties">
-                    <label class="group-label" id="label-elem-text">Văn Bản</label>
-                    <textarea id="elem-text" rows="3" oninput="updateSelectedElementProperty('text', this.value)" placeholder="Nội dung hiển thị..."></textarea>
-                    
-                    <div class="input-grid-2" style="margin-top: 8px;">
-                      <div class="input-row">
-                        <span class="input-prefix">Size</span>
-                        <input type="number" id="elem-font-size" oninput="updateSelectedElementProperty('fontSize', parseInt(this.value))" />
-                      </div>
-                      <div class="input-row">
-                        <span class="input-prefix">Color</span>
-                        <input type="text" id="elem-font-color" oninput="updateSelectedElementProperty('color', this.value)" placeholder="#ffffff hoặc {{color}}" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="inspector-group" id="group-image-properties" style="display:none;">
-                    <label class="group-label">Đường Dẫn Hình Ảnh</label>
-                    <input type="text" id="elem-src" oninput="updateSelectedElementProperty('src', this.value)" placeholder="https://example.com/stimulus.png" />
-                  </div>
-
-                  <div class="inspector-group" id="group-choice-properties" style="display:none;">
-                    <label class="group-label">Danh Sách Lựa Chọn (Options)</label>
-                    <input type="text" id="elem-options" oninput="updateSelectedElementProperty('options', this.value)" placeholder="Ví dụ: Có, Không hoặc A, B, C, D" />
-                    <small class="help-text">Phân cách các lựa chọn bằng dấu phẩy. Có thể dùng biến động như <code>{{list_options}}</code>.</small>
-                  </div>
-
-                  <div class="inspector-group" id="group-audio-properties" style="display:none;">
-                    <label class="group-label">Văn Bản Thuyết Minh (TTS)</label>
-                    <input type="text" id="elem-audio-text" oninput="updateSelectedElementProperty('text', this.value)" placeholder="Nhập câu nói hoặc dùng {{audio_text}}" />
-                    <small class="help-text">Hệ thống sẽ tự động dùng giọng nói tiếng Việt để đọc câu này khi slide xuất hiện.</small>
-                  </div>
-
-                  <div class="inspector-group">
-                    <label class="group-label">Nền & Viền</label>
-                    <div class="input-grid-2">
-                      <div class="input-row">
-                        <span class="input-prefix">Màu Nền</span>
-                        <input type="text" id="elem-bg-color" oninput="updateSelectedElementProperty('backgroundColor', this.value)" placeholder="transparent hoặc #333" />
-                      </div>
-                      <div class="input-row">
-                        <span class="input-prefix">Bo Góc</span>
-                        <input type="number" id="elem-border-radius" oninput="updateSelectedElementProperty('borderRadius', parseInt(this.value))" />
-                      </div>
-                      <div class="input-row">
-                        <span class="input-prefix">Màu Viền</span>
-                        <input type="text" id="elem-border-color" oninput="updateSelectedElementProperty('borderColor', this.value)" />
-                      </div>
-                      <div class="input-row">
-                        <span class="input-prefix">Độ Dày</span>
-                        <input type="number" id="elem-border-width" oninput="updateSelectedElementProperty('borderWidth', parseInt(this.value))" />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <button class="btn btn-danger btn-full" onclick="deleteSelectedElement()" style="margin-top: 15px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                    Xóa Thành Phần này
-                  </button>
-                </div>
-
-                <!-- Inspector: Logic Panel -->
-                <div class="inspector-tab-panel" id="inspector-panel-logic">
-                  <div class="logic-builder-box">
-                    <div class="section-subheader">
-                      <h4>Sự Kiện Kích Hoạt (Triggers)</h4>
-                    </div>
-                    <div class="trigger-type-select">
-                      <label>Sự kiện: </label>
-                      <select id="logic-trigger-type" onchange="updateElementTriggerType(this.value)">
-                        <option value="none">Không có (Tĩnh)</option>
-                        <option value="click">Nhấp chuột (On Click)</option>
-                        <option value="keypress">Nhấn phím (On Keypress)</option>
-                        <option value="timeout">Hết thời gian (On Timer / Timeout)</option>
-                      </select>
-                    </div>
-
-                    <!-- Condition & Action fields based on trigger type -->
-                    <div id="trigger-details-click" class="trigger-detail-group" style="display:none;">
-                      <div class="inspector-group">
-                        <label class="group-label">Hành động khi Click</label>
-                        <select id="click-action" onchange="updateTriggerAction('click', this.value)">
-                          <option value="next">Chuyển sang Slide tiếp theo</option>
-                          <option value="goto">Chuyển đến Slide cụ thể</option>
-                          <option value="end">Kết thúc Trial & Ghi nhận kết quả</option>
-                        </select>
-                        <div class="input-row" id="click-goto-slide-row" style="display:none; margin-top:8px;">
-                          <span class="input-prefix">Đến Slide</span>
-                          <select id="click-goto-slide-id" onchange="updateTriggerActionParam('click', 'slideId', this.value)"></select>
-                        </div>
-                      </div>
-
-                      <div class="inspector-group">
-                        <label class="group-label">Độ chính xác (Accuracy)</label>
-                        <label class="checkbox-container">
-                          <input type="checkbox" id="click-record-correct" onchange="updateTriggerAccuracy('click', this.checked)">
-                          Xem đây là phản hồi đúng
-                        </label>
-                      </div>
-                    </div>
-
-                    <div id="trigger-details-keypress" class="trigger-detail-group" style="display:none;">
-                      <div class="inspector-group">
-                        <label class="group-label">Phím hợp lệ (Key)</label>
-                        <input type="text" id="keypress-key" placeholder="Ví dụ: f hoặc j hoặc {{correct_key}}" oninput="updateTriggerActionParam('keypress', 'key', this.value)" />
-                        <small class="help-text">Nhập ký tự thường hoặc biến động như <code>{{correct_key}}</code>.</small>
-                      </div>
-
-                      <div class="inspector-group">
-                        <label class="group-label">Hành động khi nhấn phím</label>
-                        <select id="keypress-action" onchange="updateTriggerAction('keypress', this.value)">
-                          <option value="next">Chuyển sang Slide tiếp theo</option>
-                          <option value="goto">Chuyển đến Slide cụ thể</option>
-                          <option value="end">Kết thúc Trial & Ghi nhận kết quả</option>
-                        </select>
-                        <div class="input-row" id="keypress-goto-slide-row" style="display:none; margin-top:8px;">
-                          <span class="input-prefix">Đến Slide</span>
-                          <select id="keypress-goto-slide-id" onchange="updateTriggerActionParam('keypress', 'slideId', this.value)"></select>
-                        </div>
-                      </div>
-
-                      <div class="inspector-group">
-                        <label class="group-label">Kiểm tra Đáp án đúng</label>
-                        <div class="input-row">
-                          <span class="input-prefix">Đáp án đúng là</span>
-                          <input type="text" id="keypress-correct-key" placeholder="f hoặc {{correct_key}}" oninput="updateTriggerActionParam('keypress', 'correctKey', this.value)" />
-                        </div>
-                        <small class="help-text">Nếu phím người dùng ấn khớp với giá trị này, kết quả ghi nhận <code>correct = 1</code>, ngược lại <code>correct = 0</code>.</small>
-                      </div>
-                    </div>
-
-                    <div id="trigger-details-timeout" class="trigger-detail-group" style="display:none;">
-                      <div class="inspector-group">
-                        <label class="group-label">Thời gian chờ (ms)</label>
-                        <input type="number" id="timeout-duration" placeholder="1000" oninput="updateTriggerActionParam('timeout', 'duration', parseInt(this.value))" />
-                        <small class="help-text">1000 ms = 1 giây. Hỗ trợ biến động <code>{{timeout_ms}}</code>.</small>
-                      </div>
-
-                      <div class="inspector-group">
-                        <label class="group-label">Hành động khi hết giờ</label>
-                        <select id="timeout-action" onchange="updateTriggerAction('timeout', this.value)">
-                          <option value="next">Chuyển sang Slide tiếp theo</option>
-                          <option value="goto">Chuyển đến Slide cụ thể</option>
-                          <option value="end">Kết thúc Trial (Ghi nhận Không phản hồi)</option>
-                        </select>
-                        <div class="input-row" id="timeout-goto-slide-row" style="display:none; margin-top:8px;">
-                          <span class="input-prefix">Đến Slide</span>
-                          <select id="timeout-goto-slide-id" onchange="updateTriggerActionParam('timeout', 'slideId', this.value)"></select>
-                        </div>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-          </div>
-        </section>
-
-        <!-- 2. TRIALS & STIMULI PANEL -->
-        <section id="panel-trials" class="tab-panel">
-          <div class="card">
-            <div class="card-header">
-              <div class="header-title-area">
-                <h3>Bảng Kịch Bản Thí Nghiệm (Stimulus & Trial Matrix)</h3>
-                <p class="subtitle">Mỗi hàng trong bảng biểu diễn một lượt chơi (trial). Khi chạy thí nghiệm, hệ thống sẽ tự động tải các giá trị tương ứng của lượt chơi đó vào các biến <code>{{biến}}</code> trên slide. <strong>Mẹo:</strong> Để trống các cột phép toán (<code>math_eq</code>, <code>math_ans</code>, <code>dual_math</code>, <code>dual_math_ans</code>) để hệ thống tự động sinh ngẫu nhiên khi chạy.</p>
-              </div>
-              <div class="header-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button class="btn btn-secondary" onclick="addTrialRow()">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  Thêm hàng (Trial)
-                </button>
-                <button class="btn btn-secondary" onclick="addTrialColumn()">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  Thêm cột (Biến)
-                </button>
-                <button class="btn btn-secondary" onclick="fillRandomMathInTable()" title="Tự động điền các phép tính nhẩm ngẫu nhiên vào các ô trống">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
-                  Tạo phép tính ngẫu nhiên
-                </button>
-                <button class="btn btn-secondary" onclick="triggerImportFile()" style="background: rgba(0, 122, 72, 0.05); color: var(--primary-accent); border-color: rgba(0, 122, 72, 0.2);" title="Nhập danh sách câu hỏi kích thích từ Excel (.xlsx, .xls) hoặc CSV">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  Nhập Excel/CSV
-                </button>
-                <button class="btn btn-secondary" onclick="exportTrialTableCSV()" title="Xuất danh sách câu hỏi kích thích hiện tại ra CSV">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  Xuất Excel/CSV
-                </button>
-                <input type="file" id="trial-import-input" onchange="handleTrialImport(event)" accept=".csv, .xlsx, .xls" style="display: none;" />
-              </div>
-            </div>
-
-            <div class="matrix-table-wrapper">
-              <table class="spreadsheet-table" id="trials-table">
-                <thead>
-                  <tr id="trials-header-row">
-                    <!-- Dynamic Headers -->
-                  </tr>
-                </thead>
-                <tbody id="trials-body">
-                  <!-- Dynamic Rows -->
-                </tbody>
-              </table>
-            </div>
-
-            <div class="card-footer-controls">
-              <div class="random-settings">
-                <label class="checkbox-container">
-                  <input type="checkbox" id="setting-randomize-trials" onchange="updateExperimentSetting('randomizeTrials', this.checked)">
-                  Xáo trộn ngẫu nhiên thứ tự các Trials (Randomize Trial Order)
-                </label>
-              </div>
-              <div class="trial-reset-area">
-                <button class="btn btn-danger-outline" onclick="resetTrialMatrixToDefault()">Khôi phục bảng mẫu</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-
-        <section id="panel-results" class="tab-panel">
-          
-          <!-- Analytics KPI Row -->
-          <div class="results-kpi-grid">
-            <div class="kpi-card">
-              <div class="kpi-icon accent-glow">🎯</div>
-              <div class="kpi-details">
-                <span class="kpi-value" id="kpi-accuracy">--%</span>
-                <span class="kpi-label">Độ Chính Xác Trung Bình</span>
-              </div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon timer-glow">⚡</div>
-              <div class="kpi-details">
-                <span class="kpi-value" id="kpi-mean-rt">-- ms</span>
-                <span class="kpi-label">Reaction Time Trung Bình</span>
-              </div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon count-glow">📊</div>
-              <div class="kpi-details">
-                <span class="kpi-value" id="kpi-runs">0</span>
-                <span class="kpi-label">Số Lượt Thực Hiện Thí Nghiệm</span>
-              </div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon correct-glow">🏆</div>
-              <div class="kpi-details">
-                <span class="kpi-value" id="kpi-trials-total">0</span>
-                <span class="kpi-label">Tổng Số Trials Đã Thu Thập</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="results-main-grid">
-            <!-- Chart Card -->
-            <div class="card chart-container-card">
-              <div class="card-header">
-                <h3>Phân Phối Thời Gian Phản Ứng (Reaction Time Distribution)</h3>
-                <div class="chart-legend">
-                  <span class="legend-item"><span class="legend-color correct"></span>Chính xác</span>
-                  <span class="legend-item"><span class="legend-color incorrect"></span>Sai / Không phản hồi</span>
-                </div>
-              </div>
-              <div class="card-body chart-wrapper">
-                <canvas id="rt-distribution-chart" width="700" height="280"></canvas>
-              </div>
-            </div>
-
-            <!-- Participant History -->
-            <div class="card history-container-card">
-              <div class="card-header">
-                <h3>Lịch Sử Các Lượt Kiểm Tra</h3>
-                <button class="btn btn-mini btn-danger-outline" onclick="clearAllResultsData()">Xóa tất cả dữ liệu</button>
-              </div>
-              <div class="runs-history-list" id="runs-history-list">
-                <!-- History list of runs rendered here -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Trials Data Table -->
-          <div class="card data-table-card">
-            <div class="card-header">
-              <div class="header-title-area">
-                <h3>Nhật Ký Dữ Liệu Từng Trial Chi Tiết (Raw Data Export)</h3>
-                <p class="subtitle">Bảng hiển thị các phản hồi của người tham gia với mốc thời gian chuẩn xác đến mili-giây, phục vụ phân tích khoa học.</p>
-              </div>
-              <div class="header-actions">
-                <button class="btn btn-secondary" onclick="exportDataToCSV()">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                  Tải File CSV
-                </button>
-                <button class="btn btn-primary" onclick="syncResultsToGSheetManual()">
-                  Đồng Bộ Lên Google Sheets
-                </button>
-              </div>
-            </div>
-            
-            <div class="matrix-table-wrapper">
-              <table class="spreadsheet-table" id="results-table">
-                <thead>
-                  <tr>
-                    <th>Lượt (Run)</th>
-                    <th>Trial #</th>
-                    <th>Thời Điểm Ghi Nhận</th>
-                    <th>Phím Nhấn (Response)</th>
-                    <th>Đáp Án Đúng</th>
-                    <th>Kết Quả (Accuracy)</th>
-                    <th>Reaction Time (ms)</th>
-                    <th>Biến Động Tải Vào</th>
-                  </tr>
-                </thead>
-                <tbody id="results-body">
-                  <tr>
-                    <td colspan="8" class="empty-table-placeholder">Chưa thu thập dữ liệu thử nghiệm nào. Nhấp "Chạy Thí Nghiệm" để ghi nhận phản hồi đầu tiên!</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          
-        </section>
-
+      <div>
+        <div class="ws-logo-title">IPI <span>TEST</span></div>
+        <div class="ws-logo-sub">Hệ thống đánh giá nhận thức & hành vi – UTH</div>
       </div>
     </div>
+
+    <!-- Card -->
+    <div class="ws-card">
+      <div class="ws-badge">Khảo Sát Đang Mở</div>
+      <h1>Chào Mừng Bạn Đến Với<br/><span>Bài Kiểm Tra Hành Vi</span></h1>
+      <p>Vui lòng điền thông tin bên dưới và chọn nhóm bài tập trước khi bắt đầu. Toàn bộ kết quả sẽ được ghi lại tự động.</p>
+
+      <div class="ws-form">
+        <!-- Participant name -->
+        <div>
+          <label class="ws-label" for="participant-name">Tên / Mã số người tham gia</label>
+          <input class="ws-input" type="text" id="participant-name"
+                 placeholder="Ví dụ: Nguyen_Van_A hoặc P_001"
+                 value="" autocomplete="off"/>
+          <p class="ws-hint">Dùng để phân biệt kết quả của từng người trong báo cáo.</p>
+        </div>
+
+        <!-- Group selection -->
+        <div>
+          <label class="ws-label" for="player-test-group">Nhóm Bài Kiểm Tra</label>
+          <select class="ws-select" id="player-test-group" onchange="handlePlayerGroupChange(this.value)">
+            <option value="" disabled selected>-- Chọn nhóm bài test --</option>
+            <option value="type1_1">Nhóm 1: Tập Trung Cao (Multi-Task)</option>
+            <option value="gonogo">Nhóm 2: Phản Xạ Thói Quen (Go/No-Go)</option>
+            <option value="group3_audio">Nhóm 3: Trí Nhớ Thính Giác (Audio Memory)</option>
+          </select>
+          <p class="ws-hint">Chọn theo hướng dẫn của người phụ trách nghiên cứu.</p>
+        </div>
+
+        <!-- Instructions -->
+        <div class="ws-instructions">
+          <strong>Hướng dẫn:</strong> Vui lòng ngồi thẳng, tập trung vào tâm màn hình và phản hồi
+          <strong>nhanh nhất, chính xác nhất</strong> có thể bằng chuột hoặc bàn phím tùy theo
+          yêu cầu của từng bài test.
+        </div>
+
+        <!-- Start button -->
+        <button class="ws-btn" onclick="startUserExperiment()">
+          🚀 &nbsp;BẮT ĐẦU BÀI KIỂM TRA
+        </button>
+      </div>
+    </div>
+
+    <p class="ws-footer">© IPI TEST · Đại học Giao thông Vận tải TP.HCM (UTH) · Dữ liệu được mã hóa và bảo mật</p>
   </div>
 
-  <!-- ===== MODAL: EXAMPLES & TEMPLATES ===== -->
-  <div class="modal-overlay" id="modal-templates">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h2>Chọn Mẫu Thí Nghiệm Nghiên Cứu Hành Vi</h2>
-        <button class="modal-close" onclick="closeTemplatesModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="description">Các mẫu dưới đây được thiết kế sẵn theo đúng chuẩn các thí nghiệm tâm lý kinh điển. Khi chọn, hệ thống sẽ tự động cấu hình các slides và bảng trials tương ứng.</p>
-        
-        <div class="templates-grid">
-          
-          <div class="template-card" onclick="loadTemplate('type1_1')">
-            <div class="template-header">
-              <span class="template-badge" style="background: rgba(0, 122, 72, 0.15); color: #007a48; border: 1px solid rgba(0, 122, 72, 0.3);">Nhóm 1</span>
-              <h3>Tập Trung Cao (Multi-Task)</h3>
-            </div>
-            <p class="template-desc">Bài test tích hợp đa nhiệm cao độ: Ghi nhớ câu hiển thị (15s), Giải phép tính nhẩm, Khoanh trắc nghiệm Tiếng Anh, và Nhiệm vụ kép (Dual-Task) kết hợp ghi nhớ đồng thời phép tính & câu từ.</p>
-            <div class="template-meta">
-              <span>🧠 Tập trung cao độ</span>
-              <span>🔢 2 trials</span>
-            </div>
-          </div>
+  <!-- ===== EXPERIMENT PLAYER ===== -->
+  <div id="experiment-player">
+    <!-- Setup box (hidden – we do setup on welcome screen) -->
+    <div class="player-setup-box" id="player-setup-box" style="display:none!important;"></div>
 
-          <div class="template-card" onclick="loadTemplate('gonogo')">
-            <div class="template-header">
-              <span class="template-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">Nhóm 2</span>
-              <h3>Phản Xạ Thói Quen (Go/No-Go)</h3>
-            </div>
-            <p class="template-desc">Bài test phản xạ theo thói quen: Nhấp phím thật nhanh khi thấy Hình Tròn (Go) và tuyệt đối không phản ứng khi thấy Hình Vuông (No-Go). Lặp đi lặp lại nhiều lần để tạo thói quen phản xạ.</p>
-            <div class="template-meta">
-              <span>🎯 Phản xạ & Ức chế</span>
-              <span>🔢 10 trials</span>
-            </div>
-          </div>
+    <!-- Trial canvas -->
+    <div class="player-viewport" id="player-viewport"></div>
 
-          <div class="template-card" onclick="loadTemplate('group3_audio')">
-            <div class="template-header">
-              <span class="template-badge" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3);">Nhóm 3</span>
-              <h3>Trí Nhớ Thính Giác (Audio Memory)</h3>
-            </div>
-            <p class="template-desc">Bài test nghe hiểu lời nhạc/âm thanh: Hệ thống phát ngẫu nhiên câu hát hoặc đoạn âm thanh Việt hóa, sau đó yêu cầu người chơi ghi nhớ và nhập lại chính xác lời đã nghe.</p>
-            <div class="template-meta">
-              <span>🔊 Nghe hiểu & Ghi nhớ</span>
-              <span>🔢 3 trials</span>
-            </div>
-          </div>
+    <!-- Feedback -->
+    <div class="player-feedback-indicator" id="player-feedback">Đúng!</div>
 
-          <div class="template-card" onclick="loadTemplate('stroop')">
-            <div class="template-header">
-              <span class="template-badge badge-red">Kinh Điển</span>
-              <h3>Hiệu Ứng Stroop (Stroop Effect)</h3>
-            </div>
-            <p class="template-desc">Đo lường sự can thiệp nhận thức khi màu chữ và nghĩa của từ xung đột nhau (ví dụ: chữ "ĐỎ" tô màu xanh lá).</p>
-            <div class="template-meta">
-              <span>⏱️ Đo Reaction Time</span>
-              <span>🔢 12 trials</span>
-            </div>
-          </div>
-
-          <div class="template-card" onclick="loadTemplate('lexical')">
-            <div class="template-header">
-              <span class="template-badge badge-blue">Ngôn Ngữ</span>
-              <h3>Quyết Định Từ Vựng (Lexical Task)</h3>
-            </div>
-            <p class="template-desc">Phân loại nhanh chuỗi ký tự hiển thị trên màn hình có phải là từ có nghĩa hay không (ví dụ: "BANANA" vs "BANAAN").</p>
-            <div class="template-meta">
-              <span>⏱️ Đo nhận diện từ</span>
-              <span>🔢 8 trials</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== FULLSCREEN EXPERIMENT PLAYER OVERLAY ===== -->
-  <div class="player-overlay" id="experiment-player">
-    
-    <!-- Setup Screen -->
-    <div class="player-setup-box" id="player-setup-box">
-      <h2>Chuẩn Bị Khởi Chạy Thí Nghiệm</h2>
-      <p>Thí nghiệm: <strong id="player-setup-project-name">Thí nghiệm Stroop</strong></p>
-      
-      <div class="form-group" style="margin-top: 20px;">
-        <label for="participant-name">Tên / Mã số người tham gia (Participant Code)</label>
-        <input type="text" id="participant-name" value="Participant_001" placeholder="P_001" />
-        <small class="help-text">Thông tin này dùng để phân tách dữ liệu kết quả xuất ra Excel/Google Sheet.</small>
-      </div>
-
-      <div class="form-group" style="margin-top: 15px;">
-        <label for="player-test-group">Chọn Nhóm Thí Nghiệm (Test Group)</label>
-        <select id="player-test-group" onchange="handlePlayerGroupChange(this.value)" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.3); color: #fff; outline: none; font-family: var(--font-sans); font-size: 14px; cursor: pointer;">
-          <option value="" disabled selected>-- Chọn nhóm bài test để bắt đầu --</option>
-          <option value="current">Thiết kế hiện tại (Active Project)</option>
-          <option value="type1_1">Nhóm 1: Tập Trung Cao (Multi-Task)</option>
-          <option value="gonogo">Nhóm 2: Phản Xạ Thói Quen (Go/No-Go)</option>
-          <option value="group3_audio">Nhóm 3: Trí Nhớ Thính Giác (Audio Memory)</option>
-        </select>
-        <small class="help-text">Chọn nhóm bài tập hành vi muốn thực hiện kiểm tra.</small>
-      </div>
-
-      <div class="player-instructions">
-        <h3>Hướng dẫn chung:</h3>
-        <p>Vui lòng ngồi thẳng, tập trung vào tâm màn hình và phản hồi nhanh nhất, chính xác nhất có thể bằng chuột hoặc bàn phím tùy theo yêu cầu của từng slide.</p>
-      </div>
-
-      <div class="player-setup-actions">
-        <button class="btn btn-secondary" onclick="stopExperiment()">Hủy Bỏ</button>
-        <button class="btn btn-run" onclick="launchActivePlayback()">BẮT ĐẦU NGAY</button>
-      </div>
-    </div>
-
-    <!-- Active Trial Running Screen -->
-    <div class="player-viewport" id="player-viewport">
-      <!-- Active elements will be rendered here dynamically with variables injected -->
-    </div>
-
-    <!-- Feedback Indicator Toast inside Player -->
-    <div class="player-feedback-indicator" id="player-feedback">
-      Đúng!
-    </div>
-
-    <!-- Micro Precision HUD Debugging (Scientific transparency) -->
+    <!-- HUD -->
     <div class="player-hud-bar" id="player-hud">
       <span>Trial: <span id="hud-trial-num">1</span> / <span id="hud-trial-total">12</span></span>
       <span>|</span>
-      <span>Precision Timer: <span id="hud-timer">performance.now()</span></span>
+      <span>Timer: <span id="hud-timer">0</span></span>
       <span>|</span>
-      <span>Last response RT: <span id="hud-last-rt">0ms</span></span>
+      <span>RT: <span id="hud-last-rt">0ms</span></span>
     </div>
-
-    <!-- Trial Complete Screen -->
-    <div class="player-complete-box" id="player-complete-box" style="display:none;">
-      <div class="success-icon">🎉</div>
-      <h2>Thí Nghiệm Hoàn Tất!</h2>
-      <p>Cảm ơn bạn đã tham gia thực hiện các thử thách hành vi.</p>
-      
-      <div class="player-stats-preview">
-        <div class="stat-box">
-          <span class="val" id="player-res-accuracy">92%</span>
-          <span class="lbl">Tỷ lệ chính xác</span>
-        </div>
-        <div class="stat-box">
-          <span class="val" id="player-res-rt">342 ms</span>
-          <span class="lbl">Reaction Time trung bình</span>
-        </div>
-      </div>
-
-      <div class="sync-status-indicator-player" id="player-sync-status">
-        Đang đồng bộ dữ liệu nghiên cứu lên Google Sheets...
-      </div>
-
-      <div class="player-setup-actions">
-        <button class="btn btn-primary" onclick="closePlayerAndShowResults()">Xem Báo Cáo Chi Tiết</button>
-      </div>
-    </div>
-
   </div>
 
-  <!-- Notification Toast -->
-  <div id="toast-notification" class="toast-notification">Đã lưu thay đổi</div>
+  <!-- ===== COMPLETE SCREEN ===== -->
+  <div class="player-complete-box" id="player-complete-box">
+    <div class="complete-icon">🎉</div>
+    <h2>Hoàn Tất Bài Kiểm Tra!</h2>
+    <p>Cảm ơn bạn đã tham gia. Kết quả đã được ghi lại thành công.</p>
+
+    <div class="complete-stats">
+      <div class="stat-box">
+        <span class="val" id="player-res-accuracy">--%</span>
+        <span class="lbl">Tỷ lệ chính xác</span>
+      </div>
+      <div class="stat-box">
+        <span class="val" id="player-res-rt">-- ms</span>
+        <span class="lbl">Thời gian phản ứng TB</span>
+      </div>
+    </div>
+
+    <div class="sync-badge" id="player-sync-status">✅ Dữ liệu đã được gửi thành công</div>
+
+    <button class="restart-btn" onclick="location.reload()">
+      🔄 &nbsp;Làm Bài Lại
+    </button>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast-notification" class="toast-notification"></div>
+
+  <!-- Hidden elements app.js references (required, keep hidden) -->
+  <div id="project-name" style="display:none;">IPI TEST</div>
+  <div id="player-setup-project-name" style="display:none;"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="app.js"></script>
+  <script>
+    // Force participant mode on this page
+    isParticipantOnly = true;
+
+    function startUserExperiment() {
+      const name = document.getElementById('participant-name').value.trim();
+      const group = document.getElementById('player-test-group').value;
+
+      if (!name) {
+        const inp = document.getElementById('participant-name');
+        inp.style.borderColor = '#f43f5e';
+        inp.focus();
+        setTimeout(() => inp.style.borderColor = '', 2000);
+        return;
+      }
+      if (!group) {
+        const sel = document.getElementById('player-test-group');
+        sel.style.borderColor = '#f43f5e';
+        setTimeout(() => sel.style.borderColor = '', 2000);
+        return;
+      }
+
+      // Hide welcome screen, launch experiment
+      document.getElementById('welcome-screen').style.display = 'none';
+      document.getElementById('experiment-player').classList.add('active');
+
+      // Trigger group load then start
+      handlePlayerGroupChange(group);
+      setTimeout(() => {
+        launchActivePlayback();
+        document.getElementById('player-hud').style.display = 'flex';
+      }, 300);
+    }
+
+    // Override complete screen to show our custom complete UI
+    const _origFinish = window.finishExperimentPlayback;
+    document.addEventListener('DOMContentLoaded', () => {
+      // Patch after app.js loads
+      const origFinish = window.finishExperimentPlayback;
+      if (origFinish) {
+        window.finishExperimentPlayback = function() {
+          origFinish();
+          // Show our clean complete screen
+          document.getElementById('player-viewport').style.display = 'none';
+          document.getElementById('player-hud').style.display = 'none';
+          const box = document.getElementById('player-complete-box');
+          box.style.display = 'flex';
+        };
+      }
+    });
+  </script>
 </body>
 </html>
