@@ -1,15 +1,40 @@
+require('dotenv').config();
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { MongoClient } = require('mongodb');
 
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
+const MONGODB_URI = process.env.MONGODB_URI;
+
 const DATA_DIR = path.join(__dirname, 'data');
 const PROJECT_FILE = path.join(DATA_DIR, 'project.json');
 const RESULTS_FILE = path.join(DATA_DIR, 'results.json');
 
-// Ensure data directory exists
+// Ensure local data directory exists (always keep as local fallback)
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR);
+}
+
+let db = null;
+let client = null;
+let isMongoConnected = false;
+
+// Attempt MongoDB Connection if MONGODB_URI is provided
+if (MONGODB_URI) {
+  console.log('Detect MONGODB_URI. Attempting to connect to MongoDB...');
+  client = new MongoClient(MONGODB_URI);
+  client.connect()
+    .then(() => {
+      db = client.db('ipi_test');
+      isMongoConnected = true;
+      console.log('🚀 Connected to MongoDB successfully! Database: ipi_test');
+    })
+    .catch(err => {
+      console.error('❌ Failed to connect to MongoDB, falling back to local file storage.', err.message);
+    });
+} else {
+  console.log('ℹ️ No MONGODB_URI provided in environment. Using local JSON file storage.');
 }
 
 const mimeTypes = {
@@ -24,7 +49,7 @@ const mimeTypes = {
   '.ico': 'image/x-icon'
 };
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const pathname = url.pathname;
   const method = req.method;
@@ -43,12 +68,36 @@ const server = http.createServer((req, res) => {
   // API: Get/Set Project Configuration
   if (pathname === '/api/project') {
     if (method === 'GET') {
-      if (fs.existsSync(PROJECT_FILE)) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        fs.createReadStream(PROJECT_FILE).pipe(res);
+      if (isMongoConnected) {
+        try {
+          const project = await db.collection('projects').findOne({ key: 'current' });
+          if (project) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(project.state));
+          } else {
+            // If DB is empty, try loading local file config to bootstrap
+            if (fs.existsSync(PROJECT_FILE)) {
+              const fileData = fs.readFileSync(PROJECT_FILE, 'utf8');
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(fileData);
+            } else {
+              res.writeHead(404, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Project not found' }));
+            }
+          }
+        } catch (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'DB read error', details: err.message }));
+        }
       } else {
-        res.writeHead(404, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Project not found' }));
+        // Fallback to file storage
+        if (fs.existsSync(PROJECT_FILE)) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          fs.createReadStream(PROJECT_FILE).pipe(res);
+        } else {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Project not found' }));
+        }
       }
       return;
     }
@@ -56,16 +105,23 @@ const server = http.createServer((req, res) => {
     if (method === 'POST') {
       let body = '';
       req.on('data', chunk => { body += chunk; });
-      req.on('end', () => {
+      req.on('end', async () => {
         try {
-          // Validate JSON
-          JSON.parse(body);
-          fs.writeFileSync(PROJECT_FILE, body, 'utf8');
+          const parsed = JSON.parse(body);
+          if (isMongoConnected) {
+            await db.collection('projects').updateOne(
+              { key: 'current' },
+              { $set: { state: parsed } },
+              { upsert: true }
+            );
+          } else {
+            fs.writeFileSync(PROJECT_FILE, body, 'utf8');
+          }
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ status: 'success' }));
+          res.end(JSON.stringify({ status: 'success', storage: isMongoConnected ? 'mongodb' : 'local' }));
         } catch (e) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Invalid JSON' }));
+          res.end(JSON.stringify({ error: 'Invalid JSON', details: e.message }));
         }
       });
       return;
@@ -75,12 +131,25 @@ const server = http.createServer((req, res) => {
   // API: Get/Post Results
   if (pathname === '/api/results') {
     if (method === 'GET') {
-      if (fs.existsSync(RESULTS_FILE)) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        fs.createReadStream(RESULTS_FILE).pipe(res);
+      if (isMongoConnected) {
+        try {
+          // Fetch results from MongoDB sorted by id descending
+          const results = await db.collection('results').find({}).sort({ id: -1 }).toArray();
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(results));
+        } catch (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'DB read error', details: err.message }));
+        }
       } else {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify([]));
+        // Fallback to file storage
+        if (fs.existsSync(RESULTS_FILE)) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          fs.createReadStream(RESULTS_FILE).pipe(res);
+        } else {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify([]));
+        }
       }
       return;
     }
@@ -88,26 +157,29 @@ const server = http.createServer((req, res) => {
     if (method === 'POST') {
       let body = '';
       req.on('data', chunk => { body += chunk; });
-      req.on('end', () => {
+      req.on('end', async () => {
         try {
           const newResult = JSON.parse(body);
-          let results = [];
-          if (fs.existsSync(RESULTS_FILE)) {
-            try {
-              results = JSON.parse(fs.readFileSync(RESULTS_FILE, 'utf8'));
-            } catch (e) {
-              results = [];
+          if (isMongoConnected) {
+            await db.collection('results').insertOne(newResult);
+          } else {
+            let results = [];
+            if (fs.existsSync(RESULTS_FILE)) {
+              try {
+                results = JSON.parse(fs.readFileSync(RESULTS_FILE, 'utf8'));
+              } catch (e) {
+                results = [];
+              }
             }
+            if (!Array.isArray(results)) results = [];
+            results.unshift(newResult);
+            fs.writeFileSync(RESULTS_FILE, JSON.stringify(results, null, 2), 'utf8');
           }
-          if (!Array.isArray(results)) results = [];
-          results.unshift(newResult); // Prepend to show latest first
-          fs.writeFileSync(RESULTS_FILE, JSON.stringify(results, null, 2), 'utf8');
-          
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ status: 'success' }));
+          res.end(JSON.stringify({ status: 'success', storage: isMongoConnected ? 'mongodb' : 'local' }));
         } catch (e) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Invalid JSON' }));
+          res.end(JSON.stringify({ error: 'Invalid JSON', details: e.message }));
         }
       });
       return;
@@ -117,12 +189,16 @@ const server = http.createServer((req, res) => {
   // API: Clear Results
   if (pathname === '/api/clear-results' && method === 'POST') {
     try {
-      fs.writeFileSync(RESULTS_FILE, JSON.stringify([]), 'utf8');
+      if (isMongoConnected) {
+        await db.collection('results').deleteMany({});
+      } else {
+        fs.writeFileSync(RESULTS_FILE, JSON.stringify([]), 'utf8');
+      }
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'success' }));
+      res.end(JSON.stringify({ status: 'success', storage: isMongoConnected ? 'mongodb' : 'local' }));
     } catch (e) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Could not clear results' }));
+      res.end(JSON.stringify({ error: 'Could not clear results', details: e.message }));
     }
     return;
   }
