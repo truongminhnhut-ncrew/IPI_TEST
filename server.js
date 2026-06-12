@@ -2,7 +2,15 @@ require('dotenv').config();
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const dns = require('dns');
 const { MongoClient } = require('mongodb');
+
+// Set custom DNS resolvers to bypass faulty ISP DNS servers for MongoDB Atlas SRV resolution
+try {
+  dns.setServers(['1.1.1.1', '8.8.8.8', '8.8.4.4']);
+} catch (e) {
+  console.warn('Cấu hình DNS server thất bại, sử dụng DNS mặc định:', e.message);
+}
 
 const PORT = process.env.PORT || 8080;
 const MONGODB_URI = process.env.MONGODB_URI;
