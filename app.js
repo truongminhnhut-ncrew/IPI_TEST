@@ -2363,11 +2363,7 @@ function startExperiment() {
   // Set dropdown default value based on mode
   const groupSelect = document.getElementById("player-test-group");
   if (groupSelect) {
-    if (isParticipantOnly) {
-      groupSelect.value = ""; // forces them to select
-    } else {
-      groupSelect.value = "current"; // defaults to current active project for admin testing
-    }
+    groupSelect.value = "current"; // defaults to current active project
   }
   
   document.getElementById("experiment-player").classList.add("active");

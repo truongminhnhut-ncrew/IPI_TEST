@@ -203,73 +203,43 @@
 </head>
 <body>
 
-  <!-- ===== WELCOME / SETUP SCREEN ===== -->
-  <div id="welcome-screen">
-
-    <!-- Logo -->
-    <div class="ws-logo">
-      <div class="ws-logo-icon">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+  <!-- ===== FULLSCREEN EXPERIMENT PLAYER ===== -->
+  <div class="player-overlay active" id="experiment-player">
+    
+    <!-- Setup Screen -->
+    <div class="player-setup-box" id="player-setup-box">
+      <h2>Chuẩn Bị Khởi Chạy Thí Nghiệm</h2>
+      <p>Thí nghiệm: <strong id="player-setup-project-name">Thí nghiệm Stroop</strong></p>
+      
+      <div class="form-group" style="margin-top: 20px;">
+        <label for="participant-name">Tên / Mã số người tham gia (Participant Code)</label>
+        <input type="text" id="participant-name" value="Participant_001" placeholder="P_001" />
+        <small class="help-text">Thông tin này dùng để phân tách dữ liệu kết quả xuất ra Excel/Google Sheet.</small>
       </div>
-      <div>
-        <div class="ws-logo-title">IPI <span>TEST</span></div>
-        <div class="ws-logo-sub">Hệ thống đánh giá nhận thức & hành vi – UTH</div>
+
+      <div class="form-group" style="margin-top: 15px;">
+        <label for="player-test-group">Chọn Nhóm Thí Nghiệm (Test Group)</label>
+        <select id="player-test-group" onchange="handlePlayerGroupChange(this.value)" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.3); color: #fff; outline: none; font-family: var(--font-sans); font-size: 14px; cursor: pointer;">
+          <option value="current" selected>Thiết kế hiện tại (Active Project)</option>
+          <option value="type1_1">Nhóm 1: Tập Trung Cao (Multi-Task)</option>
+          <option value="gonogo">Nhóm 2: Phản Xạ Thói Quen (Go/No-Go)</option>
+          <option value="group3_audio">Nhóm 3: Trí Nhớ Thính Giác (Audio Memory)</option>
+        </select>
+        <small class="help-text">Chọn nhóm bài tập hành vi muốn thực hiện kiểm tra.</small>
       </div>
-    </div>
 
-    <!-- Card -->
-    <div class="ws-card">
-      <div class="ws-badge">Khảo Sát Đang Mở</div>
-      <h1>Chào Mừng Bạn Đến Với<br/><span id="welcome-project-name">Bài Kiểm Tra Hành Vi</span></h1>
-      <p>Vui lòng điền thông tin bên dưới và chọn nhóm bài tập trước khi bắt đầu. Toàn bộ kết quả sẽ được ghi lại tự động.</p>
+      <div class="player-instructions">
+        <h3>Hướng dẫn chung:</h3>
+        <p>Vui lòng ngồi thẳng, tập trung vào tâm màn hình và phản hồi nhanh nhất, chính xác nhất có thể bằng chuột hoặc bàn phím tùy theo yêu cầu của từng slide.</p>
+      </div>
 
-      <div class="ws-form">
-        <!-- Participant name -->
-        <div>
-          <label class="ws-label" for="participant-name">Tên / Mã số người tham gia</label>
-          <input class="ws-input" type="text" id="participant-name"
-                 placeholder="Ví dụ: Nguyen_Van_A hoặc P_001"
-                 value="" autocomplete="off"/>
-          <p class="ws-hint">Dùng để phân biệt kết quả của từng người trong báo cáo.</p>
-        </div>
-
-        <!-- Group selection -->
-        <div>
-          <label class="ws-label" for="player-test-group">Nhóm Bài Kiểm Tra</label>
-          <select class="ws-select" id="player-test-group" onchange="handlePlayerGroupChange(this.value)">
-            <option value="current" selected>Thiết kế hiện tại từ Admin (Active Project)</option>
-            <option value="type1_1">Nhóm 1: Tập Trung Cao (Multi-Task)</option>
-            <option value="gonogo">Nhóm 2: Phản Xạ Thói Quen (Go/No-Go)</option>
-            <option value="group3_audio">Nhóm 3: Trí Nhớ Thính Giác (Audio Memory)</option>
-          </select>
-          <p class="ws-hint">Chọn theo hướng dẫn của người phụ trách nghiên cứu.</p>
-        </div>
-
-        <!-- Instructions -->
-        <div class="ws-instructions">
-          <strong>Hướng dẫn:</strong> Vui lòng ngồi thẳng, tập trung vào tâm màn hình và phản hồi
-          <strong>nhanh nhất, chính xác nhất</strong> có thể bằng chuột hoặc bàn phím tùy theo
-          yêu cầu của từng bài test.
-        </div>
-
-        <!-- Start button -->
-        <button class="ws-btn" onclick="startUserExperiment()">
-          🚀 &nbsp;BẮT ĐẦU BÀI KIỂM TRA
-        </button>
+      <div class="player-setup-actions">
+        <button class="btn btn-secondary" onclick="stopExperiment()">Hủy Bỏ</button>
+        <button class="btn btn-run" onclick="launchActivePlayback()">BẮT ĐẦU NGAY</button>
       </div>
     </div>
 
-    <p class="ws-footer">© IPI TEST · Đại học Giao thông Vận tải TP.HCM (UTH) · Dữ liệu được mã hóa và bảo mật</p>
-  </div>
-
-  <!-- ===== EXPERIMENT PLAYER ===== -->
-  <div class="player-overlay" id="experiment-player">
-    <!-- Setup box (hidden – we do setup on welcome screen) -->
-    <div class="player-setup-box" id="player-setup-box" style="display:none!important;"></div>
-
-    <!-- Trial canvas -->
+    <!-- Active Trial Running Screen -->
     <div class="player-viewport" id="player-viewport"></div>
 
     <!-- Feedback -->
@@ -323,77 +293,6 @@
   <script>
     // Force participant mode on this page
     isParticipantOnly = true;
-
-    function startUserExperiment() {
-      const name = document.getElementById('participant-name').value.trim();
-      const group = document.getElementById('player-test-group').value;
-
-      if (!name) {
-        const inp = document.getElementById('participant-name');
-        inp.style.borderColor = '#f43f5e';
-        inp.focus();
-        setTimeout(() => inp.style.borderColor = '', 2000);
-        return;
-      }
-      if (!group) {
-        const sel = document.getElementById('player-test-group');
-        sel.style.borderColor = '#f43f5e';
-        setTimeout(() => sel.style.borderColor = '', 2000);
-        return;
-      }
-
-      // Check if current project is empty before running
-      if (group === "current") {
-        if (!state.slides || state.slides.length === 0) {
-          showNotification("Thiết kế hiện tại từ Admin đang trống! Vui lòng chọn nhóm bài test mẫu khác hoặc thiết kế thí nghiệm trong trang Admin.", "danger");
-          return;
-        }
-        if (!state.trialsTable || state.trialsTable.length === 0) {
-          showNotification("Bảng kích thích (Trials Table) trống! Hãy thiết kế kích thích trong trang Admin.", "danger");
-          return;
-        }
-      }
-
-      // Hide welcome screen, launch experiment
-      document.getElementById('welcome-screen').style.display = 'none';
-      document.getElementById('experiment-player').classList.add('active');
-
-      // Trigger group load then start
-      handlePlayerGroupChange(group);
-      setTimeout(() => {
-        launchActivePlayback();
-        document.getElementById('player-hud').style.display = 'flex';
-      }, 300);
-    }
-
-    // Override complete screen to show our custom complete UI
-    const _origFinish = window.finishExperimentPlayback;
-    document.addEventListener('DOMContentLoaded', () => {
-      // Auto-fill participant name
-      const nameInp = document.getElementById('participant-name');
-      if (nameInp && !nameInp.value) {
-        nameInp.value = "Subject_" + String(Date.now()).slice(-5);
-      }
-
-      // Dynamically display project name on welcome screen
-      const welcomeProjName = document.getElementById('welcome-project-name');
-      if (welcomeProjName && typeof state !== 'undefined' && state.projectName) {
-        welcomeProjName.textContent = state.projectName;
-      }
-
-      // Patch after app.js loads
-      const origFinish = window.finishExperimentPlayback;
-      if (origFinish) {
-        window.finishExperimentPlayback = function() {
-          origFinish();
-          // Show our clean complete screen
-          document.getElementById('player-viewport').style.display = 'none';
-          document.getElementById('player-hud').style.display = 'none';
-          const box = document.getElementById('player-complete-box');
-          box.style.display = 'flex';
-        };
-      }
-    });
   </script>
 </body>
 </html>
