@@ -320,7 +320,7 @@
     <!-- Card -->
     <div class="ws-card">
       <div class="ws-badge">Khảo Sát Đang Mở</div>
-      <h1>Chào Mừng Bạn Đến Với<br/><span>Bài Kiểm Tra Hành Vi</span></h1>
+      <h1>Chào Mừng Bạn Đến Với<br/><span id="welcome-project-name">Bài Kiểm Tra Hành Vi</span></h1>
       <p>Vui lòng điền thông tin bên dưới và chọn nhóm bài tập trước khi bắt đầu. Toàn bộ kết quả sẽ được ghi lại tự động.</p>
 
       <div class="ws-form">
@@ -337,8 +337,7 @@
         <div>
           <label class="ws-label" for="player-test-group">Nhóm Bài Kiểm Tra</label>
           <select class="ws-select" id="player-test-group" onchange="handlePlayerGroupChange(this.value)">
-            <option value="" disabled selected>-- Chọn nhóm bài test --</option>
-            <option value="current">Thiết kế hiện tại từ Admin (Active Project)</option>
+            <option value="current" selected>Thiết kế hiện tại từ Admin (Active Project)</option>
             <option value="type1_1">Nhóm 1: Tập Trung Cao (Multi-Task)</option>
             <option value="gonogo">Nhóm 2: Phản Xạ Thói Quen (Go/No-Go)</option>
             <option value="group3_audio">Nhóm 3: Trí Nhớ Thính Giác (Audio Memory)</option>
@@ -439,6 +438,18 @@
         return;
       }
 
+      // Check if current project is empty before running
+      if (group === "current") {
+        if (!state.slides || state.slides.length === 0) {
+          showNotification("Thiết kế hiện tại từ Admin đang trống! Vui lòng chọn nhóm bài test mẫu khác hoặc thiết kế thí nghiệm trong trang Admin.", "danger");
+          return;
+        }
+        if (!state.trialsTable || state.trialsTable.length === 0) {
+          showNotification("Bảng kích thích (Trials Table) trống! Hãy thiết kế kích thích trong trang Admin.", "danger");
+          return;
+        }
+      }
+
       // Hide welcome screen, launch experiment
       document.getElementById('welcome-screen').style.display = 'none';
       document.getElementById('experiment-player').classList.add('active');
@@ -454,6 +465,18 @@
     // Override complete screen to show our custom complete UI
     const _origFinish = window.finishExperimentPlayback;
     document.addEventListener('DOMContentLoaded', () => {
+      // Auto-fill participant name
+      const nameInp = document.getElementById('participant-name');
+      if (nameInp && !nameInp.value) {
+        nameInp.value = "Subject_" + String(Date.now()).slice(-5);
+      }
+
+      // Dynamically display project name on welcome screen
+      const welcomeProjName = document.getElementById('welcome-project-name');
+      if (welcomeProjName && typeof state !== 'undefined' && state.projectName) {
+        welcomeProjName.textContent = state.projectName;
+      }
+
       // Patch after app.js loads
       const origFinish = window.finishExperimentPlayback;
       if (origFinish) {
