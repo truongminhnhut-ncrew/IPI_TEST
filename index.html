@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css" />
   <style>
     /* ===== RESET ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -175,107 +176,8 @@
       animation: fadeUp 0.8s 0.2s ease both;
     }
 
-    /* ===== PLAYER OVERLAY (fullscreen) ===== */
-    #experiment-player {
-      display: none;
-      position: fixed; inset: 0; z-index: 100;
-      background: #0b0f1a;
-      flex-direction: column;
-      align-items: center; justify-content: center;
-    }
-    #experiment-player.active { display: flex; }
+    /* Player styles are loaded from style.css */
 
-    /* Setup box inside player (not used here since we do setup on welcome screen) */
-    .player-setup-box { display: none !important; }
-
-    /* Viewport */
-    .player-viewport {
-      width: 100%; height: 100%;
-      position: relative;
-      display: none;
-    }
-
-    /* HUD bar */
-    .player-hud-bar {
-      position: fixed; top: 0; left: 0; right: 0;
-      background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
-      display: none; align-items: center; gap: 20px;
-      padding: 8px 24px; font-size: 12px;
-      font-family: var(--mono); color: var(--text2);
-      z-index: 200;
-    }
-
-    /* Feedback */
-    .player-feedback-indicator {
-      position: fixed; top: 60px; left: 50%;
-      transform: translateX(-50%) scale(0);
-      background: var(--green-light); color: #fff;
-      padding: 8px 22px; border-radius: 100px;
-      font-weight: 700; font-size: 14px;
-      z-index: 300; transition: transform 0.15s;
-    }
-    .player-feedback-indicator.show { transform: translateX(-50%) scale(1); }
-
-    /* Complete box */
-    .player-complete-box {
-      display: none;
-      position: fixed; inset: 0; z-index: 150;
-      background: var(--bg);
-      flex-direction: column; align-items: center; justify-content: center;
-      padding: 32px 20px; text-align: center;
-    }
-    .player-complete-box.show { display: flex; }
-
-    .complete-icon { font-size: 64px; margin-bottom: 16px; animation: pop 0.5s ease; }
-    .player-complete-box h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
-    .player-complete-box p { color: var(--text2); font-size: 15px; margin-bottom: 28px; }
-
-    .complete-stats {
-      display: flex; gap: 20px; margin-bottom: 28px;
-      flex-wrap: wrap; justify-content: center;
-    }
-    .stat-box {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-      border-radius: var(--r); padding: 20px 32px;
-      min-width: 140px;
-    }
-    .stat-box .val { display: block; font-size: 32px; font-weight: 800; color: var(--green-light); }
-    .stat-box .lbl { font-size: 12px; color: var(--text2); margin-top: 4px; display: block; }
-
-    .sync-badge {
-      padding: 10px 20px; border-radius: 100px;
-      font-size: 13px; font-weight: 600;
-      background: rgba(0,122,72,0.15);
-      border: 1px solid rgba(0,122,72,0.3);
-      color: var(--green-light); margin-bottom: 24px;
-    }
-
-    .restart-btn {
-      padding: 14px 36px;
-      background: linear-gradient(135deg, var(--green), #047857);
-      border: none; border-radius: var(--r);
-      color: #fff; font-family: var(--font);
-      font-size: 15px; font-weight: 700;
-      cursor: pointer; transition: all 0.2s;
-      box-shadow: 0 4px 20px rgba(0,122,72,0.4);
-    }
-    .restart-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,122,72,0.5); }
-
-    /* Hidden elements app.js needs but shouldn't show on user page */
-    #player-sync-status { display: none !important; }
-
-    /* Toast */
-    .toast-notification {
-      position: fixed; bottom: 24px; left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--bg3); border: 1px solid var(--green-light);
-      color: var(--text); padding: 12px 22px;
-      border-radius: var(--r); font-size: 14px; font-weight: 500;
-      z-index: 9999; transition: transform 0.3s ease;
-      white-space: nowrap;
-    }
-    .toast-notification.show { transform: translateX(-50%) translateY(0); }
 
     /* ===== ANIMATIONS ===== */
     @keyframes fadeUp {
@@ -363,7 +265,7 @@
   </div>
 
   <!-- ===== EXPERIMENT PLAYER ===== -->
-  <div id="experiment-player">
+  <div class="player-overlay" id="experiment-player">
     <!-- Setup box (hidden – we do setup on welcome screen) -->
     <div class="player-setup-box" id="player-setup-box" style="display:none!important;"></div>
 
@@ -377,34 +279,36 @@
     <div class="player-hud-bar" id="player-hud">
       <span>Trial: <span id="hud-trial-num">1</span> / <span id="hud-trial-total">12</span></span>
       <span>|</span>
-      <span>Timer: <span id="hud-timer">0</span></span>
+      <span>Precision Timer: <span id="hud-timer">performance.now()</span></span>
       <span>|</span>
-      <span>RT: <span id="hud-last-rt">0ms</span></span>
-    </div>
-  </div>
-
-  <!-- ===== COMPLETE SCREEN ===== -->
-  <div class="player-complete-box" id="player-complete-box">
-    <div class="complete-icon">🎉</div>
-    <h2>Hoàn Tất Bài Kiểm Tra!</h2>
-    <p>Cảm ơn bạn đã tham gia. Kết quả đã được ghi lại thành công.</p>
-
-    <div class="complete-stats">
-      <div class="stat-box">
-        <span class="val" id="player-res-accuracy">--%</span>
-        <span class="lbl">Tỷ lệ chính xác</span>
-      </div>
-      <div class="stat-box">
-        <span class="val" id="player-res-rt">-- ms</span>
-        <span class="lbl">Thời gian phản ứng TB</span>
-      </div>
+      <span>Last response RT: <span id="hud-last-rt">0ms</span></span>
     </div>
 
-    <div class="sync-badge" id="player-sync-status">✅ Dữ liệu đã được gửi thành công</div>
+    <!-- Trial Complete Screen -->
+    <div class="player-complete-box" id="player-complete-box" style="display:none;">
+      <div class="success-icon">🎉</div>
+      <h2>Thí Nghiệm Hoàn Tất!</h2>
+      <p>Cảm ơn bạn đã tham gia thực hiện các thử thách hành vi.</p>
+      
+      <div class="player-stats-preview">
+        <div class="stat-box">
+          <span class="val" id="player-res-accuracy">--%</span>
+          <span class="lbl">Tỷ lệ chính xác</span>
+        </div>
+        <div class="stat-box">
+          <span class="val" id="player-res-rt">-- ms</span>
+          <span class="lbl">Reaction Time trung bình</span>
+        </div>
+      </div>
 
-    <button class="restart-btn" onclick="location.reload()">
-      🔄 &nbsp;Làm Bài Lại
-    </button>
+      <div class="sync-status-indicator-player" id="player-sync-status">
+        Đang đồng bộ dữ liệu nghiên cứu lên Google Sheets...
+      </div>
+
+      <div class="player-setup-actions">
+        <button class="btn btn-primary" onclick="location.reload()">🔄 &nbsp;Làm Bài Lại</button>
+      </div>
+    </div>
   </div>
 
   <!-- Toast -->
